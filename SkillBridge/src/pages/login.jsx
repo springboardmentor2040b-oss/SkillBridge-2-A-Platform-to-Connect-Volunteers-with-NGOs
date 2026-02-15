@@ -7,11 +7,11 @@ const Login = () => {
 
      
       <div className="flex justify-between items-center px-10 py-4 bg-white border-b">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <img
           src="/logo.jpeg"
           alt="SkillBridge Logo"
-          className="w-[95px] h-[45px] object-contain"/>
+          className="w-[90px] h-[45px] object-contain"/>
          <span className="text-3xl font-semibold text-[#2F5373]">
           SkillBridge
          </span>
