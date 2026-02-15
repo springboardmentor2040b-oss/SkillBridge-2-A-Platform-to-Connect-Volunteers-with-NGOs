@@ -6,6 +6,7 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
+  const [ngoName, setNgoName] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
 
@@ -19,6 +20,11 @@ const Register = () => {
       newErrors.email = "Enter valid email";
 
     if (!role) newErrors.role = "Select a role";
+
+    // Validate NGO name only if role is NGO
+    if (role === "NGO" && !ngoName) {
+      newErrors.ngoName = "NGO name is required";
+    }
 
     if (!password) newErrors.password = "Password is required";
 
@@ -100,6 +106,22 @@ const Register = () => {
           <div className="h-[18px] text-red-500 text-sm text-left">
             {errors.role}
           </div>
+
+          {/* NGO Name - Only show if role is NGO */}
+          {role === "NGO" && (
+            <>
+              <input
+                type="text"
+                placeholder="NGO Name"
+                value={ngoName}
+                onChange={(e) => setNgoName(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+              />
+              <div className="h-[18px] text-red-500 text-sm text-left">
+                {errors.ngoName}
+              </div>
+            </>
+          )}
 
           {/* Password */}
           <input
