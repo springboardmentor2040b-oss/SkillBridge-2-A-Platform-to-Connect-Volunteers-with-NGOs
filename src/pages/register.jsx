@@ -6,7 +6,16 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
+
+  // Volunteer fields
+  const [skills, setSkills] = useState("");
+  const [location, setLocation] = useState("");
+
+  // NGO fields
   const [ngoName, setNgoName] = useState("");
+  const [organizationDescription, setOrganizationDescription] = useState("");
+  const [website, setWebsite] = useState("");
+
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
 
@@ -21,9 +30,19 @@ const Register = () => {
 
     if (!role) newErrors.role = "Select a role";
 
-    // Validate NGO name only if role is NGO
-    if (role === "NGO" && !ngoName) {
-      newErrors.ngoName = "NGO name is required";
+    // Volunteer validation
+    if (role === "Volunteer") {
+      if (!skills) newErrors.skills = "Skills are required";
+      if (!location) newErrors.location = "Location is required";
+    }
+
+    // NGO validation
+    if (role === "NGO") {
+      if (!ngoName) newErrors.ngoName = "Organization name is required";
+      if (!organizationDescription)
+        newErrors.organizationDescription = "Description is required";
+      if (!website) newErrors.website = "Website is required";
+      if (!location) newErrors.location = "Location is required";
     }
 
     if (!password) newErrors.password = "Password is required";
@@ -34,7 +53,7 @@ const Register = () => {
 
   const handleRegister = () => {
     if (validate()) {
-      alert("Registration successful ✅");
+      alert("Registration successful ");
     }
   };
 
@@ -62,8 +81,8 @@ const Register = () => {
       </div>
 
       {/* Register Box */}
-      <div className="flex justify-center items-center h-[85vh]">
-        <div className="bg-white p-8 w-[360px] rounded-xl shadow-lg text-center">
+      <div className="flex justify-center items-center py-10">
+        <div className="bg-white p-8 w-[400px] rounded-xl shadow-lg text-center">
 
           <h2 className="text-2xl font-semibold text-[#2F5373] mb-6">
             Register
@@ -72,12 +91,12 @@ const Register = () => {
           {/* Name */}
           <input
             type="text"
-            placeholder="Name"
+            placeholder="Full Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
           />
-          <div className="h-[18px] text-red-500 text-sm text-left">
+          <div className="text-red-500 text-sm text-left mb-2">
             {errors.name}
           </div>
 
@@ -87,9 +106,9 @@ const Register = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
           />
-          <div className="h-[18px] text-red-500 text-sm text-left">
+          <div className="text-red-500 text-sm text-left mb-2">
             {errors.email}
           </div>
 
@@ -97,28 +116,87 @@ const Register = () => {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
           >
             <option value="">Select Role</option>
-            <option>Volunteer</option>
-            <option>NGO</option>
+            <option value="Volunteer">Volunteer</option>
+            <option value="NGO">NGO</option>
           </select>
-          <div className="h-[18px] text-red-500 text-sm text-left">
+          <div className="text-red-500 text-sm text-left mb-2">
             {errors.role}
           </div>
 
-          {/* NGO Name - Only show if role is NGO */}
+          {/* Volunteer Fields */}
+          {role === "Volunteer" && (
+            <>
+              <input
+                type="text"
+                placeholder="Skills (comma separated)"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+              />
+              <div className="text-red-500 text-sm text-left mb-2">
+                {errors.skills}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+              />
+              <div className="text-red-500 text-sm text-left mb-2">
+                {errors.location}
+              </div>
+            </>
+          )}
+
+          {/* NGO Fields */}
           {role === "NGO" && (
             <>
               <input
                 type="text"
-                placeholder="NGO Name"
+                placeholder="Organization Name"
                 value={ngoName}
                 onChange={(e) => setNgoName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
               />
-              <div className="h-[18px] text-red-500 text-sm text-left">
+              <div className="text-red-500 text-sm text-left mb-2">
                 {errors.ngoName}
+              </div>
+
+              <textarea
+                placeholder="Organization Description"
+                value={organizationDescription}
+                onChange={(e) => setOrganizationDescription(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+              />
+              <div className="text-red-500 text-sm text-left mb-2">
+                {errors.organizationDescription}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Website URL"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+              />
+              <div className="text-red-500 text-sm text-left mb-2">
+                {errors.website}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+              />
+              <div className="text-red-500 text-sm text-left mb-2">
+                {errors.location}
               </div>
             </>
           )}
@@ -129,9 +207,9 @@ const Register = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
           />
-          <div className="h-[18px] text-red-500 text-sm text-left mb-2">
+          <div className="text-red-500 text-sm text-left mb-4">
             {errors.password}
           </div>
 

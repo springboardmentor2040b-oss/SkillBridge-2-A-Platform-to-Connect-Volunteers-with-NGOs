@@ -7,28 +7,91 @@ const Home = () => {
   const [searchClicked, setSearchClicked] = useState(false);
 
   const opportunities = [
-    {
-      title: "Teaching Assistant",
-      ngo: "Helping Hands",
-      skill: "Teaching",
-      location: "Remote",
-      desc: "Help rural students learn basic math and English."
-    },
-    {
-      title: "Web Developer",
-      ngo: "Green Earth",
-      skill: "Web Development",
-      location: "Remote",
-      desc: "Build a website for an environmental NGO."
-    },
-    {
-      title: "Graphic Designer",
-      ngo: "Care Foundation",
-      skill: "Design",
-      location: "Hyderabad",
-      desc: "Create posters and social media graphics."
-    }
-  ];
+  {
+    title: "Teaching Assistant",
+    ngo: "Helping Hands",
+    skill: "Teaching",
+    location: "Remote",
+    desc: "Help rural students learn basic math and English."
+  },
+  {
+    title: "Web Developer",
+    ngo: "Green Earth",
+    skill: "Web Development",
+    location: "Remote",
+    desc: "Build a website for an environmental NGO."
+  },
+  {
+    title: "Graphic Designer",
+    ngo: "Care Foundation",
+    skill: "Design",
+    location: "Hyderabad",
+    desc: "Create posters and social media graphics."
+  },
+  {
+    title: "Content Writer",
+    ngo: "Hope Trust",
+    skill: "Writing",
+    location: "Bangalore",
+    desc: "Write blogs and newsletters for awareness campaigns."
+  },
+  {
+    title: "Social Media Manager",
+    ngo: "Youth Empower",
+    skill: "Marketing",
+    location: "Remote",
+    desc: "Manage Instagram and LinkedIn pages for NGO outreach."
+  },
+  {
+    title: "Mobile App Developer",
+    ngo: "Digital Future",
+    skill: "App Development",
+    location: "Chennai",
+    desc: "Develop a mobile app for community reporting."
+  },
+  {
+    title: "Data Analyst",
+    ngo: "Health First",
+    skill: "Data Analysis",
+    location: "Delhi",
+    desc: "Analyze health survey data and generate reports."
+  },
+  {
+    title: "Event Coordinator",
+    ngo: "Bright Smile",
+    skill: "Management",
+    location: "Hyderabad",
+    desc: "Organize fundraising and awareness events."
+  },
+  {
+    title: "Video Editor",
+    ngo: "Inspire India",
+    skill: "Video Editing",
+    location: "Remote",
+    desc: "Edit documentary clips for social campaigns."
+  },
+  {
+    title: "Photography Volunteer",
+    ngo: "Care Foundation",
+    skill: "Photography",
+    location: "Mumbai",
+    desc: "Capture moments during community programs."
+  },
+  {
+    title: "UI/UX Designer",
+    ngo: "Tech for Good",
+    skill: "UI/UX",
+    location: "Remote",
+    desc: "Design user-friendly interfaces for NGO platforms."
+  },
+  {
+    title: "Fundraising Volunteer",
+    ngo: "Helping Hands",
+    skill: "Fundraising",
+    location: "Kolkata",
+    desc: "Help raise funds through online and offline campaigns."
+  }
+];
 
   const results = opportunities.filter((item) =>
     item.title.toLowerCase().includes(query.toLowerCase()) ||
