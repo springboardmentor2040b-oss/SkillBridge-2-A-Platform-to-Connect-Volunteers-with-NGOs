@@ -3,49 +3,106 @@ import { Link } from "react-router-dom";
 
 const Register = () => {
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    role: "",
+    skills: [], 
+    location: "",
+    ngoName: "",
+    organizationDescription: "",
+    website: "",
+    password: "",
+    confirmPassword: ""
+  });
 
-  // Volunteer fields
-  const [skills, setSkills] = useState("");
-  const [location, setLocation] = useState("");
-
-  // NGO fields
-  const [ngoName, setNgoName] = useState("");
-  const [organizationDescription, setOrganizationDescription] = useState("");
-  const [website, setWebsite] = useState("");
-
-  const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleSkillChange = (e) => {
+    const { value, checked } = e.target;
+
+    if (checked) {
+      setFormData({
+        ...formData,
+        skills: [...formData.skills, value]
+      });
+    } else {
+      setFormData({
+        ...formData,
+        skills: formData.skills.filter((skill) => skill !== value)
+      });
+    }
+  };
 
   const validate = () => {
     let newErrors = {};
 
-    if (!name) newErrors.name = "Name is required";
-
-    if (!email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email))
-      newErrors.email = "Enter valid email";
-
-    if (!role) newErrors.role = "Select a role";
-
-    // Volunteer validation
-    if (role === "Volunteer") {
-      if (!skills) newErrors.skills = "Skills are required";
-      if (!location) newErrors.location = "Location is required";
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
     }
 
-    // NGO validation
-    if (role === "NGO") {
-      if (!ngoName) newErrors.ngoName = "Organization name is required";
-      if (!organizationDescription)
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    if (!formData.role) {
+      newErrors.role = "Select a role";
+    }
+
+    if (formData.role === "Volunteer") {
+      if (formData.skills.length === 0) {
+        newErrors.skills = "Select at least one skill";
+      }
+      if (!formData.location.trim()) {
+        newErrors.location = "Location is required";
+      }
+    }
+
+    if (formData.role === "NGO") {
+      if (!formData.ngoName.trim()) {
+        newErrors.ngoName = "Organization name is required";
+      }
+      if (!formData.organizationDescription.trim()) {
         newErrors.organizationDescription = "Description is required";
-      if (!website) newErrors.website = "Website is required";
-      if (!location) newErrors.location = "Location is required";
+      }
+      if (!formData.location.trim()) {
+        newErrors.location = "Location is required";
+      }
+
+      if (formData.website && !/^https?:\/\/.+\..+/.test(formData.website)) {
+        newErrors.website = "Enter a valid website URL";
+      }
     }
 
-    if (!password) newErrors.password = "Password is required";
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } 
+    else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    }
+    else if (
+      !/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(formData.password)
+    ) {
+      newErrors.password =
+        "Password must contain 1 uppercase, 1 number & 1 special character";
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Confirm password is required";
+    } 
+    else if (formData.confirmPassword !== formData.password) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -53,7 +110,8 @@ const Register = () => {
 
   const handleRegister = () => {
     if (validate()) {
-      alert("Registration successful ");
+      alert("Registration successful ✅");
+      console.log(formData);
     }
   };
 
@@ -68,149 +126,206 @@ const Register = () => {
             alt="SkillBridge Logo"
             className="w-[90px] h-[45px] object-contain"
           />
-          <span className="text-3xl font-semibold text-[#2F5373]">
+          <span className="text-2xl sm:text-3xl font-semibold text-[#2F5373]">
             SkillBridge
           </span>
-        </div>
-
-        <div className="flex gap-6 text-[#2F5373] font-medium">
-          <a href="#">About Us</a>
-          <a href="#">Contact Us</a>
-          <a href="#">FAQs</a>
         </div>
       </div>
 
       {/* Register Box */}
-      <div className="flex justify-center items-center py-10">
-        <div className="bg-white p-8 w-[400px] rounded-xl shadow-lg text-center">
+      <div className="flex justify-center items-center min-h-[85vh]">
+        <div className="bg-white p-6 sm:p-8 w-full max-w-md mx-4 rounded-xl shadow-lg">
 
-          <h2 className="text-2xl font-semibold text-[#2F5373] mb-6">
+          <h2 className="text-2xl font-semibold text-[#2F5373] mb-6 text-center">
             Register
           </h2>
 
           {/* Name */}
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-          />
-          <div className="text-red-500 text-sm text-left mb-2">
-            {errors.name}
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-[#2F5373] mb-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter your name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            />
+            <p className="text-red-500 text-sm mt-1">{errors.name}</p>
           </div>
 
           {/* Email */}
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-          />
-          <div className="text-red-500 text-sm text-left mb-2">
-            {errors.email}
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-[#2F5373] mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            />
+            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
           </div>
 
           {/* Role */}
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-          >
-            <option value="">Select Role</option>
-            <option value="Volunteer">Volunteer</option>
-            <option value="NGO">NGO</option>
-          </select>
-          <div className="text-red-500 text-sm text-left mb-2">
-            {errors.role}
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-[#2F5373] mb-1">
+              Select Role
+            </label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            >
+              <option value="">Choose role</option>
+              <option value="Volunteer">Volunteer</option>
+              <option value="NGO">NGO</option>
+            </select>
+            <p className="text-red-500 text-sm mt-1">{errors.role}</p>
           </div>
 
           {/* Volunteer Fields */}
-          {role === "Volunteer" && (
+          {formData.role === "Volunteer" && (
             <>
-              <input
-                type="text"
-                placeholder="Skills (comma separated)"
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-              />
-              <div className="text-red-500 text-sm text-left mb-2">
-                {errors.skills}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-[#2F5373] mb-2">
+                  Select Skills
+                </label>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {[
+                    "Web Development",
+                    "Graphic Design",
+                    "Content Writing",
+                    "Teaching & Mentoring",
+                    "Event Management",
+                    "Fundraising",
+                    "Photography & Videography",
+                    "Translation & Language Support",
+                    "Data Entry & Administration",
+                    "Community Outreach"
+                  ].map((skill) => (
+                    <label key={skill} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        value={skill}
+                        checked={formData.skills.includes(skill)}
+                        onChange={handleSkillChange}
+                        className="accent-[#6CBBA2]"
+                      />
+                      {skill}
+                    </label>
+                  ))}
+                </div>
+
+                <p className="text-red-500 text-sm mt-1">{errors.skills}</p>
               </div>
 
-              <input
-                type="text"
-                placeholder="Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-              />
-              <div className="text-red-500 text-sm text-left mb-2">
-                {errors.location}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-[#2F5373] mb-1">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Enter your location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+                />
+                <p className="text-red-500 text-sm mt-1">{errors.location}</p>
               </div>
             </>
           )}
-
           {/* NGO Fields */}
-          {role === "NGO" && (
+          {formData.role === "NGO" && (
             <>
-              <input
-                type="text"
-                placeholder="Organization Name"
-                value={ngoName}
-                onChange={(e) => setNgoName(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-              />
-              <div className="text-red-500 text-sm text-left mb-2">
-                {errors.ngoName}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-[#2F5373] mb-1">
+                  Organization Name
+                </label>
+                <input
+                  type="text"
+                  name="ngoName"
+                  placeholder="Enter organization name"
+                  value={formData.ngoName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+                />
+                <p className="text-red-500 text-sm mt-1">{errors.ngoName}</p>
               </div>
 
-              <textarea
-                placeholder="Organization Description"
-                value={organizationDescription}
-                onChange={(e) => setOrganizationDescription(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-              />
-              <div className="text-red-500 text-sm text-left mb-2">
-                {errors.organizationDescription}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-[#2F5373] mb-1">
+                  Organization Description
+                </label>
+                <textarea
+                  name="organizationDescription"
+                  placeholder="Briefly describe your organization"
+                  value={formData.organizationDescription}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+                />
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.organizationDescription}
+                </p>
               </div>
 
-              <input
-                type="text"
-                placeholder="Website URL"
-                value={website}
-                onChange={(e) => setWebsite(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-              />
-              <div className="text-red-500 text-sm text-left mb-2">
-                {errors.website}
-              </div>
-
-              <input
-                type="text"
-                placeholder="Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-              />
-              <div className="text-red-500 text-sm text-left mb-2">
-                {errors.location}
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-[#2F5373] mb-1">
+                  Location
+                </label>
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Enter your location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+                />
+                <p className="text-red-500 text-sm mt-1">{errors.location}</p>
               </div>
             </>
           )}
 
           {/* Password */}
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md mb-1 focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-          />
-          <div className="text-red-500 text-sm text-left mb-4">
-            {errors.password}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-[#2F5373] mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            />
+            <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+          </div>
+
+          {/* Confirm Password */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-[#2F5373] mb-1">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm your password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
+            />
+            <p className="text-red-500 text-sm mt-1">
+              {errors.confirmPassword}
+            </p>
           </div>
 
           <button
@@ -220,7 +335,7 @@ const Register = () => {
             Register
           </button>
 
-          <p className="mt-4 text-sm">
+          <p className="mt-4 text-sm text-center">
             Already have an account?{" "}
             <Link
               to="/login"
