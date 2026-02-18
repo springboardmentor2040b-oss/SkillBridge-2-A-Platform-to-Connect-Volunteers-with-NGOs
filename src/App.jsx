@@ -3,7 +3,7 @@ import Home from "./pages/home";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import Opportunities from "./pages/opportunities";
-import NGOs from "./pages/NGOs";
+import Connect from "./pages/connect";
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         <Route path="/opportunities" element={<Opportunities />} />
-        <Route path="/NGOs" element={<NGOs />} />
+        <Route path="/connect" element={<Connect />} />
       </Routes>
     </BrowserRouter>
   );
