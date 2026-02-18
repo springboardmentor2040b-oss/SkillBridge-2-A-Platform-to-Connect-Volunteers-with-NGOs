@@ -1,13 +1,14 @@
 import User from '../models/User.js';
+import { successResponse, errorResponse, notFound } from '../utils/responseHandler.js';
 
 export const getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return notFound(res, 'User not found');
         }
-        res.json(user);
+        successResponse(res, user, 'User profile retrieved successfully');
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        errorResponse(res, 'Server error', 500, error);
     }
 };
