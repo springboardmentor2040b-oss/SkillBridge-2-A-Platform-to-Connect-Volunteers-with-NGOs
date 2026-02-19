@@ -33,7 +33,7 @@ async def login_user(user:UserLogin):
     if existing_user['password']!=user.password:
         raise HTTPException(status_code=400,detail="invalid password")
     
-    token_resp = signJWT(existing_user['email'], existing_user['role'])
+    token_resp = signJWT(existing_user['email'], existing_user['role'], existing_user['username'])
     
     return {
         "username":existing_user['username'],

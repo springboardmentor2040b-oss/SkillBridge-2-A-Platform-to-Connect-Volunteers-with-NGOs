@@ -1,6 +1,6 @@
 
 import time
-from typing import Dict
+from typing import Dict, Optional
 from jose import jwt
 from decouple import config
 
@@ -12,10 +12,11 @@ def token_response(token: str):
         "access_token": token
     }
 
-def signJWT(user_id: str, role: str) -> Dict[str, str]:
+def signJWT(user_id: str, role: str, username: Optional[str] = None) -> Dict[str, str]:
     payload = {
         "user_id": user_id,
         "role": role,
+        "username": username,
         "expires": time.time() + 3600 # 1 hour
     }
     
