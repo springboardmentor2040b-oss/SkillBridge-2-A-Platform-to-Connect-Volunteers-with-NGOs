@@ -2,157 +2,68 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const Home = () => {
-  const [query, setQuery] = useState("");
-  const [searchClicked, setSearchClicked] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-
-  const opportunities = [
-  {
-    title: "Web Developer",
-    ngo: "Helping Hands",
-    skill: "Web Development",
-    location: "Remote",
-    desc: "Develop and maintain websites for NGO initiatives."
-  },
-  {
-    title: "Graphic Designer",
-    ngo: "Creative Care",
-    skill: "Graphic Design",
-    location: "Remote",
-    desc: "Design posters, social media graphics, and campaign materials."
-  },
-  {
-    title: "Content Writer",
-    ngo: "Bright Future",
-    skill: "Content Writing",
-    location: "Remote",
-    desc: "Write blogs, newsletters, and website content for awareness campaigns."
-  },
-  {
-    title: "Teaching Mentor",
-    ngo: "EduServe",
-    skill: "Teaching & Mentoring",
-    location: "On-site",
-    desc: "Support students with academic mentoring and skill development."
-  },
-  {
-    title: "Event Coordinator",
-    ngo: "Community Connect",
-    skill: "Event Management",
-    location: "Hyderabad",
-    desc: "Plan and manage fundraising and community engagement events."
-  },
-  {
-    title: "Fundraising Volunteer",
-    ngo: "Hope Foundation",
-    skill: "Fundraising",
-    location: "Remote",
-    desc: "Assist in organizing fundraising campaigns and donor outreach."
-  },
-  {
-    title: "Photographer / Videographer",
-    ngo: "Vision Impact",
-    skill: "Photography & Videography",
-    location: "On-site",
-    desc: "Capture photos and videos to document NGO activities."
-  },
-  {
-    title: "Language Support Volunteer",
-    ngo: "Global Aid",
-    skill: "Translation & Language Support",
-    location: "Remote",
-    desc: "Translate documents and provide multilingual communication support."
-  },
-  {
-    title: "Administrative Assistant",
-    ngo: "Care Alliance",
-    skill: "Data Entry & Administration",
-    location: "On-site",
-    desc: "Maintain records, manage databases, and assist with administrative tasks."
-  },
-  {
-    title: "Community Outreach Volunteer",
-    ngo: "Social Impact Trust",
-    skill: "Community Outreach",
-    location: "Hyderabad",
-    desc: "Engage with local communities to promote awareness programs."
-  }
-];
-
-
-  const results = opportunities.filter((item) =>
-    item.title.toLowerCase().includes(query.toLowerCase()) ||
-    item.skill.toLowerCase().includes(query.toLowerCase()) ||
-    item.ngo.toLowerCase().includes(query.toLowerCase())
-  );
-
-  const handleSearch = () => {
-    if (query.trim() !== "") {
-      setSearchClicked(true);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#f5f7f6]">
 
       {/* ================= NAVBAR ================= */}
-       <div className="flex justify-between items-center px-6 sm:px-10 py-4 bg-white border-b">
+      <div className="flex justify-between items-center px-6 sm:px-10 py-4 bg-white border-b">
 
-  <div
-  onClick={() => setActiveSection("home")}
-  className="flex items-center gap-2 cursor-pointer min-w-0"
->
-  <img
-    src="/logo.jpeg"
-    alt="SkillBridge Logo"
-    className="w-[70px] sm:w-[90px] h-auto object-contain"
-  />
-  <span className="text-2xl sm:text-3xl font-semibold text-[#2F5373]">
-    SkillBridge
-  </span>
-</div>
+        <div
+          onClick={() => setActiveSection("home")}
+          className="flex items-center gap-2 cursor-pointer min-w-0"
+        >
+          <img
+            src="/logo.jpeg"
+            alt="SkillBridge Logo"
+            className="w-[70px] sm:w-[90px] h-auto object-contain"
+          />
+          <span className="text-2xl sm:text-3xl font-semibold text-[#2F5373]">
+            SkillBridge
+          </span>
+        </div>
 
+        {/* Desktop Menu */}
+        <div className="hidden md:flex gap-8 items-center text-[#2F5373] font-medium">
+          <button
+            onClick={() => setActiveSection("about")}
+            className="hover:text-[#6CBBA2] transition"
+          >
+            About Us
+          </button>
 
-  {/* Desktop Menu */}
-  <div className="hidden md:flex gap-8 items-center text-[#2F5373] font-medium">
-    <button
-      onClick={() => setActiveSection("about")}
-      className="hover:text-[#6CBBA2] transition"
-    >
-      About Us
-    </button>
+          <button
+            onClick={() => setActiveSection("contact")}
+            className="hover:text-[#6CBBA2] transition"
+          >
+            Contact Us
+          </button>
 
-    <button
-      onClick={() => setActiveSection("contact")}
-      className="hover:text-[#6CBBA2] transition"
-    >
-      Contact Us
-    </button>
+          <button
+            onClick={() => setActiveSection("faq")}
+            className="hover:text-[#6CBBA2] transition"
+          >
+            FAQs
+          </button>
 
-    <button
-      onClick={() => setActiveSection("faq")}
-      className="hover:text-[#6CBBA2] transition"
-    >
-      FAQs
-    </button>
+          <Link to="/login">
+            <button className="bg-[#6CBBA2] px-5 py-1.5 rounded-md text-white hover:bg-[#2F5373] transition">
+              Login
+            </button>
+          </Link>
+        </div>
 
-    <Link to="/login">
-      <button className="bg-[#6CBBA2] px-5 py-1.5 rounded-md text-white hover:bg-[#2F5373] transition">
-        Login
-      </button>
-    </Link>
-  </div>
+        {/* Mobile Login Button */}
+        <div className="md:hidden">
+          <Link to="/login">
+            <button className="bg-[#6CBBA2] px-4 py-1.5 rounded-md text-white hover:bg-[#2F5373] transition">
+              Login
+            </button>
+          </Link>
+        </div>
 
-  {/* Mobile Login Button */}
-  <div className="md:hidden">
-    <Link to="/login">
-      <button className="bg-[#6CBBA2] px-4 py-1.5 rounded-md text-white hover:bg-[#2F5373] transition">
-        Login
-      </button>
-    </Link>
-  </div>
-
-</div>
+      </div>
 
       {/* ================= HOME CONTENT ================= */}
       {activeSection === "home" && (
@@ -168,104 +79,48 @@ const Home = () => {
           </div>
 
           {/* CARDS SECTION */}
-<div className="flex justify-center mt-8 px-4">
-  <div className="bg-white rounded-xl shadow-md 
-                  flex flex-col md:flex-row 
-                  w-full md:w-[700px] 
-                  overflow-hidden">
+          <div className="flex justify-center mt-8 px-4">
+            <div className="bg-white rounded-xl shadow-md 
+                            flex flex-col md:flex-row 
+                            w-full md:w-[700px] 
+                            overflow-hidden">
 
-    {/* Find Opportunities */}
-    <Link to="/opportunities" className="flex-1 md:border-r">
-      <div className="p-6 text-center cursor-pointer hover:shadow-lg transition">
-        <img
-          src="/search.jpeg"
-          alt="Search"
-          className="w-[70px] h-[55px] mb-3 mx-auto"
-        />
-        <h3 className="text-lg font-semibold text-[#2F5373]">
-          Find Opportunities
-        </h3>
-        <p className="text-gray-600 text-sm mt-2">
-          Search and explore volunteer opportunities easily.
-        </p>
-      </div>
-    </Link>
-
-    {/* Connect & Learn */}
-    <Link to="/ngos" className="flex-1">
-      <div className="p-6 text-center cursor-pointer hover:shadow-lg transition">
-        <img
-          src="/handshake.jpeg"
-          alt="Handshake"
-          className="w-[70px] h-[55px] mb-3 mx-auto"
-        />
-        <h3 className="text-lg font-semibold text-[#2F5373]">
-          Connect & Learn
-        </h3>
-        <p className="text-gray-600 text-sm mt-2">
-          Learn about NGOs and how you can contribute your skills.
-        </p>
-      </div>
-    </Link>
-
-  </div>
-</div>
-
-
-          {/* SEARCH */}
-<div className="flex justify-center mt-8 px-4">
-  <div className="flex flex-col sm:flex-row w-full md:w-[700px] gap-3">
-
-    <input
-      type="text"
-      placeholder="Search (Teaching, Web, Graphic...)"
-      value={query}
-      onChange={(e) => {
-        const value = e.target.value;
-        setQuery(value);
-        if (value.trim() === "") {
-          setSearchClicked(false);
-        }
-      }}
-      className="flex-1 px-4 py-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#6CBBA2]"
-    />
-
-    <button
-      onClick={handleSearch}
-      className="bg-[#6CBBA2] px-6 py-3 rounded-md text-white hover:bg-[#2F5373] transition"
-    >
-      Search
-    </button>
-
-  </div>
-</div> 
-
-          {/* RESULTS */}
-          {searchClicked && (
-            <div className="flex justify-center mt-8 px-4">
-              <div className="w-[520px]">
-
-                {results.length === 0 && (
-                  <p className="text-center text-gray-500">
-                    No opportunities found for "{query}"
+              {/* Find Opportunities */}
+              <Link to="/opportunities" className="flex-1 md:border-r">
+                <div className="p-6 text-center cursor-pointer hover:shadow-lg transition">
+                  <img
+                    src="/search.jpeg"
+                    alt="Search"
+                    className="w-[70px] h-[55px] mb-3 mx-auto"
+                  />
+                  <h3 className="text-lg font-semibold text-[#2F5373]">
+                    Find Opportunities
+                  </h3>
+                  <p className="text-gray-600 text-sm mt-2">
+                    Search and explore volunteer opportunities easily.
                   </p>
-                )}
+                </div>
+              </Link>
 
-                {results.map((item, index) => (
-                  <div key={index} className="bg-white p-4 rounded-md shadow mb-4">
-                    <h3 className="text-lg font-semibold text-[#2F5373]">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-gray-600">{item.ngo}</p>
-                    <p className="text-sm">Skill: {item.skill}</p>
-                    <p className="text-sm">Location: {item.location}</p>
-                    <p className="text-sm mt-1">{item.desc}</p>
-                  </div>
-                ))}
+              {/* Connect & Learn */}
+              <Link to="/connect" className="flex-1">
+                <div className="p-6 text-center cursor-pointer hover:shadow-lg transition">
+                  <img
+                    src="/handshake.jpeg"
+                    alt="Handshake"
+                    className="w-[70px] h-[55px] mb-3 mx-auto"
+                  />
+                  <h3 className="text-lg font-semibold text-[#2F5373]">
+                    Connect & Learn
+                  </h3>
+                  <p className="text-gray-600 text-sm mt-2">
+                    Learn about NGOs and how you can contribute your skills.
+                  </p>
+                </div>
+              </Link>
 
-              </div>
             </div>
-          )}
+          </div>
         </>
       )}
 
@@ -298,7 +153,7 @@ const Home = () => {
       )}
 
       {/* ================= FAQ ================= */}
-      {activeSection === "faq" && (
+{activeSection === "faq" && (
   <div className="flex justify-center mt-20 px-4">
     <div className="bg-white w-[700px] rounded-xl shadow-md p-10">
       <h2 className="text-3xl font-semibold text-[#2F5373] mb-6">
@@ -353,11 +208,11 @@ const Home = () => {
           in-person participation depending on the NGO.
         </p>
       </div>
+
     </div>
   </div>
 )}
-
-
+ 
     </div>
   );
 };

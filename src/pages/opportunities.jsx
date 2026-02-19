@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../utils/api";
-import { Search, MapPin, Briefcase, Clock } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 
 const Opportunities = () => {
   const [opportunities, setOpportunities] = useState([]);
