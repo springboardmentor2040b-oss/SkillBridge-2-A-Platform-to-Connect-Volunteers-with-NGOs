@@ -1,7 +1,6 @@
 import motor.motor_asyncio
 from decouple import config
 
-# Use environment variables for the connection string
 MONGO_URL = config("MONGO_URL", default="mongodb://localhost:27017")
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
 

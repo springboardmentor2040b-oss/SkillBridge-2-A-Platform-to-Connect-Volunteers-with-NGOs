@@ -4,8 +4,8 @@ from typing import Dict, Optional
 from jose import jwt
 from decouple import config
 
-JWT_SECRET = config("secret", default="your_secret_key")
-JWT_ALGORITHM = config("algorithm", default="HS256")
+JWT_SECRET = config("SECRET_KEY", default="your_secret_key")
+JWT_ALGORITHM = config("ALGORITHM", default="HS256")
 
 def token_response(token: str):
     return {
