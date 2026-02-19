@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const Register = () => {
 
@@ -7,7 +8,7 @@ const Register = () => {
     name: "",
     email: "",
     role: "",
-    skills: [], 
+    skills: [],
     location: "",
     ngoName: "",
     organizationDescription: "",
@@ -17,6 +18,8 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const { register } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,7 +89,7 @@ const Register = () => {
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } 
+    }
     else if (formData.password.length < 8) {
       newErrors.password = "Password must be at least 8 characters";
     }
@@ -99,7 +102,7 @@ const Register = () => {
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Confirm password is required";
-    } 
+    }
     else if (formData.confirmPassword !== formData.password) {
       newErrors.confirmPassword = "Passwords do not match";
     }
@@ -108,10 +111,12 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (validate()) {
-      alert("Registration successful ✅");
-      console.log(formData);
+      const success = await register(formData);
+      if (success) {
+        navigate("/login"); // Redirect to login after successful registration
+      }
     }
   };
 

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
 
@@ -9,6 +10,8 @@ const Login = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,10 +39,12 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (validate()) {
-      alert("Login successful ✅");
-      console.log(formData);
+      const success = await login(formData.email, formData.password);
+      if (success) {
+        navigate("/dashboard"); // Redirect to dashboard/home
+      }
     }
   };
 
@@ -67,8 +72,8 @@ const Login = () => {
           <h2 className="text-2xl font-semibold text-[#2F5373] mb-6 text-center">
             Login
           </h2>
-          
-          
+
+
 
           {/* Email */}
           <div className="mb-3">
