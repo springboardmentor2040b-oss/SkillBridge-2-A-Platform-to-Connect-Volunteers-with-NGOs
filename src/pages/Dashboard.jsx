@@ -1,5 +1,7 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import api from '../utils/api';
 import {
     LayoutDashboard,
     Search,
@@ -19,27 +21,50 @@ const Dashboard = () => {
     const { user, logout } = useContext(AuthContext);
     const isNGO = user?.role === 'NGO';
 
-    console.log('Dashboard - User data:', user);
-    console.log('Dashboard - isNGO:', isNGO);
-
     // NGO stats
-    const [ngoStats] = useState({
+    const [ngoStats, setNgoStats] = useState({
         activeOpportunities: 0,
         applications: 0,
         activeVolunteers: 0,
         pendingApplications: 0,
     });
-    const [recentApplications] = useState([]);
+    const [recentApplications, setRecentApplications] = useState([]);
 
     // Volunteer stats
-    const [volunteerStats] = useState({
+    const [volunteerStats, setVolunteerStats] = useState({
         applied: 0,
         accepted: 0,
         inProgress: 0,
         completed: 0,
     });
-    const [recommendedOpps] = useState([]);
-    const [myApplications] = useState([]);
+    const [recommendedOpps, setRecommendedOpps] = useState([]);
+    const [myApplications, setMyApplications] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                if (isNGO) {
+                    const res = await api.get('/opportunities/my-opportunities');
+                    const opportunities = res.data.data;
+                    setNgoStats(prev => ({
+                        ...prev,
+                        activeOpportunities: opportunities.length
+                    }));
+                    // For now, we don't have applications endpoint, so we leave it empty or mock it
+                } else {
+                    const res = await api.get('/opportunities');
+                    const opportunities = res.data.data;
+                    setRecommendedOpps(opportunities.slice(0, 4)); // Show first 4
+                }
+            } catch (error) {
+                console.error('Failed to fetch dashboard data', error);
+            }
+        };
+
+        if (user) {
+            fetchData();
+        }
+    }, [user, isNGO]);
 
     return (
         <div className="min-h-screen bg-[#f8f9fa]">
@@ -128,52 +153,58 @@ const Dashboard = () => {
 };
 
 // ==================== NGO DASHBOARD CONTENT ====================
-const NGOContent = ({ stats, applications }) => (
-    <>
-        {/* Overview */}
-        <div>
-            <h2 className="text-xl font-bold text-[#2F5373] mb-4">Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard count={stats.activeOpportunities} label="Active Opportunities" color="bg-[#e3f2fd]" icon={<Briefcase size={20} />} />
-                <StatCard count={stats.applications} label="Applications" color="bg-[#e8f5e9]" icon={<FileText size={20} />} />
-                <StatCard count={stats.activeVolunteers} label="Active Volunteers" color="bg-[#f3e5f5]" icon={<User size={20} />} />
-                <StatCard count={stats.pendingApplications} label="Pending" color="bg-[#fffde7]" icon={<Clock size={20} />} />
-            </div>
-        </div>
-
-        {/* Recent Applications */}
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-bold text-[#2F5373]">Recent Applications</h3>
-                <button className="text-sm font-medium text-gray-500 hover:text-[#2F5373] border px-3 py-1 rounded-md">View All</button>
-            </div>
-            {applications.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-4">No applications received yet</p>
-            ) : (
-                <div className="space-y-4">
-                    {applications.map((app) => (
-                        <ApplicationCard key={app.id} app={app} />
-                    ))}
+const NGOContent = ({ stats, applications }) => {
+    const navigate = useNavigate();
+    return (
+        <>
+            {/* Overview */}
+            <div>
+                <h2 className="text-xl font-bold text-[#2F5373] mb-4">Overview</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard count={stats.activeOpportunities} label="Active Opportunities" color="bg-[#e3f2fd]" icon={<Briefcase size={20} />} />
+                    <StatCard count={stats.applications} label="Applications" color="bg-[#e8f5e9]" icon={<FileText size={20} />} />
+                    <StatCard count={stats.activeVolunteers} label="Active Volunteers" color="bg-[#f3e5f5]" icon={<User size={20} />} />
+                    <StatCard count={stats.pendingApplications} label="Pending" color="bg-[#fffde7]" icon={<Clock size={20} />} />
                 </div>
-            )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-            <h3 className="text-lg font-bold text-[#2F5373] mb-6">Quick Actions</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#2F5373] hover:bg-blue-50 transition group">
-                    <Plus className="w-8 h-8 text-gray-400 group-hover:text-[#2F5373] mb-2" />
-                    <span className="font-medium text-gray-600 group-hover:text-[#2F5373]">Create New Opportunity</span>
-                </button>
-                <button className="flex flex-col items-center justify-center p-6 border rounded-xl hover:bg-gray-50 transition group">
-                    <MessageSquare className="w-8 h-8 text-[#2F5373] mb-2" />
-                    <span className="font-medium text-[#2F5373]">View Messages</span>
-                </button>
             </div>
-        </div>
-    </>
-);
+
+            {/* Recent Applications */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold text-[#2F5373]">Recent Applications</h3>
+                    <button className="text-sm font-medium text-gray-500 hover:text-[#2F5373] border px-3 py-1 rounded-md">View All</button>
+                </div>
+                {applications.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-4">No applications received yet</p>
+                ) : (
+                    <div className="space-y-4">
+                        {applications.map((app) => (
+                            <ApplicationCard key={app.id} app={app} />
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-lg font-bold text-[#2F5373] mb-6">Quick Actions</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button
+                        onClick={() => navigate('/create-opportunity')}
+                        className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#2F5373] hover:bg-blue-50 transition group"
+                    >
+                        <Plus className="w-8 h-8 text-gray-400 group-hover:text-[#2F5373] mb-2" />
+                        <span className="font-medium text-gray-600 group-hover:text-[#2F5373]">Create New Opportunity</span>
+                    </button>
+                    <button className="flex flex-col items-center justify-center p-6 border rounded-xl hover:bg-gray-50 transition group">
+                        <MessageSquare className="w-8 h-8 text-[#2F5373] mb-2" />
+                        <span className="font-medium text-[#2F5373]">View Messages</span>
+                    </button>
+                </div>
+            </div>
+        </>
+    )
+};
 
 // ==================== VOLUNTEER DASHBOARD CONTENT ====================
 const VolunteerContent = ({ stats, recommendations, applications }) => (

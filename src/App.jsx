@@ -5,24 +5,23 @@ import Register from "./pages/register";
 import Opportunities from "./pages/opportunities";
 import NGOs from "./pages/NGOs";
 import Dashboard from "./pages/Dashboard";
+import CreateOpportunity from "./pages/CreateOpportunity";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Home Page */}
         <Route path="/" element={<Home />} />
 
-        {/* Login Page */}
         <Route path="/login" element={<Login />} />
 
-        {/* Register Page */}
         <Route path="/register" element={<Register />} />
 
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/NGOs" element={<NGOs />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/create-opportunity" element={<CreateOpportunity />} />
       </Routes>
     </BrowserRouter>
   );
