@@ -5,7 +5,6 @@ import Register from "./pages/register";
 import Opportunities from "./pages/opportunities";
 import NGOs from "./pages/NGOs";
 import Dashboard from "./pages/Dashboard";
-import CreateOpportunity from "./pages/CreateOpportunity";
 
 function App() {
   return (
@@ -21,7 +20,6 @@ function App() {
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/NGOs" element={<NGOs />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create-opportunity" element={<CreateOpportunity />} />
       </Routes>
     </BrowserRouter>
   );
