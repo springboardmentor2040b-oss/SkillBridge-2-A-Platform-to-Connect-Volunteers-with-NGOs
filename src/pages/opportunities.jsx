@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import api from "../utils/api";
-import { MapPin, Clock, Search, X, SlidersHorizontal } from "lucide-react";
+import { MapPin, Clock, Search, X, SlidersHorizontal, ArrowLeft } from "lucide-react";
 
 const PREDEFINED_SKILLS = [
   'React', 'Node.js', 'JavaScript', 'Python', 'TypeScript',
@@ -16,7 +17,9 @@ const Opportunities = () => {
   const [locationFilter, setLocationFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showFilters, setShowFilters] = useState(true);
+  const [myApplications, setMyApplications] = useState({}); // { opportunityId: status }
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
 
   const fetchOpportunities = useCallback(async () => {
     setLoading(true);
@@ -29,12 +32,22 @@ const Opportunities = () => {
 
       const res = await api.get('/opportunities', { params });
       setOpportunities(res.data.data);
+
+      // Fetch volunteer's applications to show status on cards
+      if (user && user.role !== 'NGO') {
+        const appRes = await api.get('/applications/my');
+        const appMap = {};
+        appRes.data.data.forEach(app => {
+          appMap[app.opportunity._id] = app.status;
+        });
+        setMyApplications(appMap);
+      }
     } catch (error) {
       console.error("Failed to fetch opportunities", error);
     } finally {
       setLoading(false);
     }
-  }, [search, selectedSkills, locationFilter, statusFilter]);
+  }, [search, selectedSkills, locationFilter, statusFilter, user]);
 
   // Debounce fetch so we don't spam API on every keystroke
   useEffect(() => {
@@ -66,6 +79,9 @@ const Opportunities = () => {
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
+            <button onClick={() => navigate('/')} className="text-sm text-gray-400 hover:text-[#2F5373] mb-2 flex items-center gap-1 transition">
+              <ArrowLeft size={15} /> Back to Home
+            </button>
             <h1 className="text-3xl font-bold text-[#2F5373] mb-1">Volunteer Opportunities</h1>
             <p className="text-gray-600">Find meaningful projects and contribute your skills to causes you care about.</p>
           </div>
@@ -195,15 +211,25 @@ const Opportunities = () => {
                     <h3 className="text-lg font-bold text-[#2F5373] leading-tight">{opp.title}</h3>
                     <p className="text-sm text-gray-500 mt-0.5">{opp.postedBy?.ngoName || 'NGO'}</p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ml-2 ${
-                    opp.status === 'active'
-                      ? 'bg-green-100 text-green-700'
-                      : opp.status === 'closed'
-                      ? 'bg-red-100 text-red-600'
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {opp.status}
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
+                      opp.status === 'Open'
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-600'
+                    }`}>
+                      {opp.status}
+                    </span>
+                    {myApplications[opp._id] && (
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium whitespace-nowrap ${
+                        myApplications[opp._id] === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                        myApplications[opp._id] === 'accepted' ? 'bg-teal-100 text-teal-700' :
+                        'bg-red-100 text-red-600'
+                      }`}>
+                        {myApplications[opp._id] === 'pending' ? '⏳ Applied' :
+                         myApplications[opp._id] === 'accepted' ? '✓ Accepted' : '✕ Rejected'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <p className="text-gray-600 text-sm mb-4 line-clamp-3">{opp.description}</p>

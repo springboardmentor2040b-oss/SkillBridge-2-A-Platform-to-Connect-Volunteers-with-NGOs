@@ -79,8 +79,8 @@ const Dashboard = () => {
                         <span className="text-xl font-bold text-[#2F5373]">SkillBridge</span>
                     </div>
                     <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-                        <a href="#" className="text-[#2F5373]">Dashboard</a>
-                        <a href="#" className="hover:text-[#2F5373]">Opportunities</a>
+                        <a href="/dashboard" className="text-[#2F5373]">Dashboard</a>
+                        <a href="/opportunities" className="hover:text-[#2F5373]">Opportunities</a>
                         <a href="#" className="hover:text-[#2F5373]">{isNGO ? 'Applications' : 'My Applications'}</a>
                         <a href="#" className="hover:text-[#2F5373]">Messages</a>
                     </div>
@@ -111,10 +111,10 @@ const Dashboard = () => {
                         <p className="text-xs text-gray-500 uppercase font-semibold mt-1">{user?.role || 'User'}</p>
                     </div>
                     <nav className="space-y-1">
-                        <SidebarItem icon={<LayoutDashboard size={18} />} label="Dashboard" active />
-                        <SidebarItem icon={<Search size={18} />} label={isNGO ? 'Opportunities' : 'Browse Opportunities'} />
-                        <SidebarItem icon={<FileText size={18} />} label={isNGO ? 'Applications' : 'My Applications'} />
-                        <SidebarItem icon={<MessageSquare size={18} />} label="Messages" />
+                        <SidebarItem icon={<LayoutDashboard size={18} />} label="Dashboard" active href="/dashboard" />
+                        <SidebarItem icon={<Search size={18} />} label={isNGO ? 'Opportunities' : 'Browse Opportunities'} href="/opportunities" />
+                        <SidebarItem icon={<FileText size={18} />} label={isNGO ? 'Applications' : 'My Applications'} href="#" />
+                        <SidebarItem icon={<MessageSquare size={18} />} label="Messages" href="#" />
                     </nav>
                     <div className="mt-8 pt-6 border-t">
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
@@ -203,7 +203,9 @@ const NGOContent = ({ stats, applications, onStatusChange }) => {
 };
 
 // ==================== VOLUNTEER DASHBOARD ====================
-const VolunteerContent = ({ stats, recommendations, applications }) => (
+const VolunteerContent = ({ stats, recommendations, applications }) => {
+    const navigate = useNavigate();
+    return (
     <>
         <div>
             <h2 className="text-xl font-bold text-[#2F5373] mb-4">My Progress</h2>
@@ -237,7 +239,11 @@ const VolunteerContent = ({ stats, recommendations, applications }) => (
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {recommendations.map((opp) => (
-                        <div key={opp._id} className="p-4 bg-gray-50 rounded-lg border hover:shadow-md transition">
+                        <div
+                            key={opp._id}
+                            onClick={() => navigate(`/opportunities/${opp._id}`)}
+                            className="p-4 bg-gray-50 rounded-lg border hover:shadow-md hover:border-[#6CBBA2] transition cursor-pointer"
+                        >
                             <h4 className="font-semibold text-[#2F5373]">{opp.title}</h4>
                             <p className="text-sm text-gray-600 mt-1">{opp.postedBy?.ngoName || 'NGO'}</p>
                             <p className="text-xs text-gray-500 mt-1">📍 {opp.location}</p>
@@ -248,7 +254,8 @@ const VolunteerContent = ({ stats, recommendations, applications }) => (
             )}
         </div>
     </>
-);
+    );
+};
 
 // ==================== APPLICATION CARDS ====================
 
@@ -342,13 +349,13 @@ const StatusBadge = ({ status }) => (
     </span>
 );
 
-const SidebarItem = ({ icon, label, active }) => (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition ${
+const SidebarItem = ({ icon, label, active, href = '#' }) => (
+    <a href={href} className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition ${
         active ? 'bg-[#f0f9ff] text-[#2F5373] font-semibold border-l-4 border-[#2F5373]' : 'text-gray-600 hover:bg-gray-50 hover:text-[#2F5373]'
     }`}>
         {icon}
         <span className="text-sm">{label}</span>
-    </div>
+    </a>
 );
 
 const StatCard = ({ count, label, color, icon }) => (
