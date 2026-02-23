@@ -54,29 +54,33 @@ SkillBridge/
 │   ├── server.js             # Entry point
 │   └── .env                  # Environment variables
 │
-├── src/                      # React frontend
-│   ├── components/
-│   │   └── Navbar.jsx        # Shared responsive Navbar + theme toggle
-│   ├── context/
-│   │   ├── AuthContext.jsx   # Authentication state
-│   │   └── ThemeContext.jsx  # Dark/light theme state
-│   ├── pages/
-│   │   ├── home.jsx
-│   │   ├── login.jsx
-│   │   ├── register.jsx
-│   │   ├── Dashboard.jsx
-│   │   ├── opportunities.jsx
-│   │   ├── OpportunityDetail.jsx
-│   │   ├── CreateOpportunity.jsx
-│   │   └── NGOs.jsx
-│   ├── utils/
-│   │   └── api.js            # Axios instance with base URL
-│   └── constants/
-│       └── skills.js         # Predefined skills list
+├── frontend/                 # React frontend (Vite)
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── Navbar.jsx    # Shared responsive Navbar + theme toggle
+│   │   ├── context/
+│   │   │   ├── AuthContext.jsx   # Authentication state
+│   │   │   └── ThemeContext.jsx  # Dark/light theme state
+│   │   ├── pages/
+│   │   │   ├── home.jsx
+│   │   │   ├── login.jsx
+│   │   │   ├── register.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── opportunities.jsx
+│   │   │   ├── OpportunityDetail.jsx
+│   │   │   ├── CreateOpportunity.jsx
+│   │   │   └── NGOs.jsx
+│   │   ├── utils/
+│   │   │   └── api.js        # Axios instance with base URL
+│   │   └── constants/
+│   │       └── skills.js     # Predefined skills list
+│   ├── public/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.js
+│   └── tailwind.config.js
 │
-├── tailwind.config.js
-├── vite.config.js
-└── index.html
+└── README.md
 ```
 
 ---
@@ -113,8 +117,9 @@ npm run dev
 > Runs on `http://localhost:5000`
 
 ### 3. Setup the Frontend
-Open a new terminal in the project root:
+Open a new terminal from the project root:
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
