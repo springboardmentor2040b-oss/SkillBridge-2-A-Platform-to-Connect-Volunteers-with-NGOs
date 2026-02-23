@@ -19,7 +19,6 @@ function App() {
         <Route path="/opportunities/:id" element={<OpportunityDetail />} />
         <Route path="/NGOs" element={<NGOs />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/create-opportunity" element={<CreateOpportunity />} />
       </Routes>
     </BrowserRouter>
   );
