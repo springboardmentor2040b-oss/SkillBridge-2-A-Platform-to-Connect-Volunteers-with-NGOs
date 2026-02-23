@@ -64,19 +64,29 @@ const OpportunityDetail = () => {
         </div>
     );
 
-    const isNGO = user?.role === 'NGO';
+    const isCreator = user?.id === opportunity.postedBy?._id || user?._id === opportunity.postedBy?._id;
+    const canApply = user && !isCreator;
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-3xl mx-auto">
 
                 {/* Back Button */}
-                <button
-                    onClick={() => navigate('/opportunities')}
-                    className="flex items-center gap-2 text-gray-500 hover:text-[#2F5373] mb-6 transition"
-                >
-                    <ArrowLeft size={18} /> Back to Opportunities
-                </button>
+                <div className="flex items-center gap-3 mb-6">
+                    <button
+                        onClick={() => navigate('/opportunities')}
+                        className="flex items-center gap-2 text-gray-500 hover:text-[#2F5373] transition"
+                    >
+                        <ArrowLeft size={18} /> Back to Opportunities
+                    </button>
+                    <span className="text-gray-300">|</span>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="text-gray-500 hover:text-[#2F5373] text-sm transition"
+                    >
+                        🏠 Home
+                    </button>
+                </div>
 
                 <div className="bg-white rounded-xl shadow-sm border p-8">
 
@@ -130,8 +140,8 @@ const OpportunityDetail = () => {
                         </div>
                     </div>
 
-                    {/* Apply Button — hidden for NGO users */}
-                    {!isNGO && (
+                    {/* Apply Button */}
+                    {canApply && (
                         <button
                             onClick={() => !alreadyApplied && setShowModal(true)}
                             disabled={alreadyApplied || opportunity.status === 'Closed'}
@@ -145,6 +155,9 @@ const OpportunityDetail = () => {
                         >
                             {alreadyApplied ? '✓ Already Applied' : opportunity.status === 'Closed' ? 'Applications Closed' : 'Apply Now'}
                         </button>
+                    )}
+                    {isCreator && (
+                        <p className="text-center text-sm text-gray-400">You created this opportunity</p>
                     )}
                 </div>
             </div>

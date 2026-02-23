@@ -3,11 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import api from "../utils/api";
 import { MapPin, Clock, Search, X, SlidersHorizontal, ArrowLeft } from "lucide-react";
-
-const PREDEFINED_SKILLS = [
-  'React', 'Node.js', 'JavaScript', 'Python', 'TypeScript',
-  'MongoDB', 'Figma', 'Communication', 'Leadership', 'Project Management',
-];
+import { PREDEFINED_SKILLS } from "../constants/skills";
 
 const Opportunities = () => {
   const [opportunities, setOpportunities] = useState([]);
@@ -79,7 +75,7 @@ const Opportunities = () => {
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <button onClick={() => navigate('/')} className="text-sm text-gray-400 hover:text-[#2F5373] mb-2 flex items-center gap-1 transition">
+            <button onClick={() => navigate('/dashboard')} className="text-sm text-gray-400 hover:text-[#2F5373] mb-2 flex items-center gap-1 transition">
               <ArrowLeft size={15} /> Back to Home
             </button>
             <h1 className="text-3xl font-bold text-[#2F5373] mb-1">Volunteer Opportunities</h1>

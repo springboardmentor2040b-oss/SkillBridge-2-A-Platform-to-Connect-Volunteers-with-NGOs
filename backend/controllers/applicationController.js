@@ -16,6 +16,11 @@ export const applyToOpportunity = async (req, res) => {
             return errorResponse(res, 'Opportunity not found', 404);
         }
 
+        // Block the creator from applying to their own opportunity
+        if (opportunity.postedBy.toString() === req.user.id) {
+            return errorResponse(res, 'You cannot apply to your own opportunity', 400);
+        }
+
         // Check if already applied
         const existing = await Application.findOne({
             opportunity: opportunityId,
@@ -69,7 +74,7 @@ export const getNGOApplications = async (req, res) => {
 
         const applications = await Application.find({ opportunity: { $in: opportunityIds } })
             .populate('applicant', 'name email location skills')
-            .populate('opportunity', 'title location')
+            .populate('opportunity', 'title location skillsRequired')
             .sort({ createdAt: -1 });
 
         return successResponse(res, applications, 'NGO applications retrieved successfully');

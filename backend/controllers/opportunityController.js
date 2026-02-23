@@ -1,6 +1,14 @@
 import Opportunity from '../models/Opportunity.js';
 import { successResponse, errorResponse } from '../utils/responseHandler.js';
 
+// Helper: auto-close opportunities past their deadline
+const autoCloseExpired = async () => {
+    await Opportunity.updateMany(
+        { deadline: { $lt: new Date() }, status: 'Open' },
+        { $set: { status: 'Closed' } }
+    );
+};
+
 export const createOpportunity = async (req, res) => {
     try {
         const { title, description, skillsRequired, location, deadline } = req.body;
@@ -24,21 +32,17 @@ export const createOpportunity = async (req, res) => {
 
 export const getAllOpportunities = async (req, res) => {
     try {
+        // Auto-close any expired opportunities before fetching
+        await autoCloseExpired();
+
         const { search, skills, location, status } = req.query;
 
         const query = {};
 
-        // Status filter
-        if (status) {
-            query.status = status;
-        }
+        if (status) query.status = status;
 
-        // Location filter (partial, case-insensitive)
-        if (location) {
-            query.location = { $regex: location, $options: 'i' };
-        }
+        if (location) query.location = { $regex: location, $options: 'i' };
 
-        // Skills filter — comma-separated e.g. ?skills=React,Node.js
         if (skills) {
             const skillsArray = skills.split(',').map(s => s.trim()).filter(Boolean);
             if (skillsArray.length > 0) {
@@ -48,7 +52,6 @@ export const getAllOpportunities = async (req, res) => {
             }
         }
 
-        // Search across title and description
         if (search) {
             query.$or = [
                 { title: { $regex: search, $options: 'i' } },
@@ -68,6 +71,9 @@ export const getAllOpportunities = async (req, res) => {
 
 export const getOpportunityById = async (req, res) => {
     try {
+        // Auto-close if this specific opportunity is expired
+        await autoCloseExpired();
+
         const opportunity = await Opportunity.findById(req.params.id).populate('postedBy', 'name ngoName email');
         if (!opportunity) {
             return errorResponse(res, 'Opportunity not found', 404);
@@ -77,8 +83,10 @@ export const getOpportunityById = async (req, res) => {
         return errorResponse(res, 'Failed to retrieve opportunity', 500, error);
     }
 };
+
 export const getMyOpportunities = async (req, res) => {
     try {
+        await autoCloseExpired();
         const opportunities = await Opportunity.find({ postedBy: req.user.id });
         return successResponse(res, opportunities, 'My opportunities retrieved successfully');
     } catch (error) {

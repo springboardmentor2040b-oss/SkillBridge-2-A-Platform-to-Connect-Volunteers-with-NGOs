@@ -14,6 +14,7 @@ const Dashboard = () => {
     // NGO state
     const [ngoStats, setNgoStats] = useState({ activeOpportunities: 0, applications: 0, activeVolunteers: 0, pendingApplications: 0 });
     const [recentApplications, setRecentApplications] = useState([]);
+    const [myNGOApplications, setMyNGOApplications] = useState([]); // applications this NGO sent
 
     // Volunteer state
     const [volunteerStats, setVolunteerStats] = useState({ applied: 0, accepted: 0, inProgress: 0, completed: 0 });
@@ -28,9 +29,13 @@ const Dashboard = () => {
                     const oppRes = await api.get('/opportunities/my-opportunities');
                     const opportunities = oppRes.data.data;
 
-                    // Fetch applications for NGO's opportunities
+                    // Fetch applications RECEIVED for NGO's opportunities
                     const appRes = await api.get('/applications/ngo');
                     const applications = appRes.data.data;
+
+                    // Fetch applications this NGO SENT to other opportunities
+                    const sentRes = await api.get('/applications/my');
+                    setMyNGOApplications(sentRes.data.data);
 
                     const pending = applications.filter(a => a.status === 'pending').length;
                     const accepted = applications.filter(a => a.status === 'accepted').length;
@@ -132,7 +137,7 @@ const Dashboard = () => {
                 {/* MAIN CONTENT */}
                 <main className="flex-1 space-y-6 pb-10">
                     {isNGO ? (
-                        <NGOContent stats={ngoStats} applications={recentApplications} onStatusChange={(id, status) => {
+                        <NGOContent stats={ngoStats} applications={recentApplications} myApplications={myNGOApplications} onStatusChange={(id, status) => {
                             setRecentApplications(prev => prev.map(a => a._id === id ? { ...a, status } : a));
                             // Update stats counts
                             setNgoStats(prev => ({
@@ -151,7 +156,7 @@ const Dashboard = () => {
 };
 
 // ==================== NGO DASHBOARD ====================
-const NGOContent = ({ stats, applications, onStatusChange }) => {
+const NGOContent = ({ stats, applications, myApplications = [], onStatusChange }) => {
     const navigate = useNavigate();
     return (
         <>
@@ -160,22 +165,34 @@ const NGOContent = ({ stats, applications, onStatusChange }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <StatCard count={stats.activeOpportunities} label="Active Opportunities" color="bg-[#e3f2fd]" icon={<Briefcase size={20} />} />
                     <StatCard count={stats.applications} label="Total Applications" color="bg-[#e8f5e9]" icon={<FileText size={20} />} />
-                    <StatCard count={stats.activeVolunteers} label="Accepted Volunteers" color="bg-[#f3e5f5]" icon={<User size={20} />} />
+                    <StatCard count={stats.activeVolunteers} label="Accepted" color="bg-[#f3e5f5]" icon={<User size={20} />} />
                     <StatCard count={stats.pendingApplications} label="Pending" color="bg-[#fffde7]" icon={<Clock size={20} />} />
                 </div>
             </div>
 
-            {/* Recent Applications */}
+            {/* Applications Received */}
             <div className="bg-white rounded-xl shadow-sm border p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-lg font-bold text-[#2F5373]">Recent Applications</h3>
-                </div>
+                <h3 className="text-lg font-bold text-[#2F5373] mb-6">Applications Received</h3>
                 {applications.length === 0 ? (
                     <p className="text-gray-500 text-sm text-center py-4">No applications received yet</p>
                 ) : (
                     <div className="space-y-4">
                         {applications.map((app) => (
                             <NGOApplicationCard key={app._id} app={app} onStatusChange={onStatusChange} />
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* My Applications (sent by this NGO) */}
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+                <h3 className="text-lg font-bold text-[#2F5373] mb-6">My Applications</h3>
+                {myApplications.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-4">You haven't applied to any opportunities yet</p>
+                ) : (
+                    <div className="space-y-4">
+                        {myApplications.map((app) => (
+                            <VolunteerApplicationCard key={app._id} app={app} />
                         ))}
                     </div>
                 )}
@@ -261,6 +278,7 @@ const VolunteerContent = ({ stats, recommendations, applications }) => {
 
 const NGOApplicationCard = ({ app, onStatusChange }) => {
     const [loading, setLoading] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
 
     const handleStatus = async (status) => {
         setLoading(true);
@@ -274,46 +292,147 @@ const NGOApplicationCard = ({ app, onStatusChange }) => {
         }
     };
 
-    return (
-        <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border">
-            <div className="w-10 h-10 rounded-full bg-[#e8f5f1] flex items-center justify-center text-[#2F5373] font-bold flex-shrink-0">
-                {app.applicant?.name?.charAt(0) || '?'}
-            </div>
-            <div className="flex-1">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h4 className="font-semibold text-[#2F5373]">{app.applicant?.name || 'Volunteer'}</h4>
-                        <p className="text-sm text-gray-500">{app.applicant?.email}</p>
-                        <p className="text-sm text-gray-600 mt-0.5">Applied for: <span className="font-medium">{app.opportunity?.title}</span></p>
-                    </div>
-                    <StatusBadge status={app.status} />
-                </div>
-                {app.coverLetter && (
-                    <p className="text-sm text-gray-500 mt-2 line-clamp-2 italic">"{app.coverLetter}"</p>
-                )}
-                <p className="text-xs text-gray-400 mt-1">{new Date(app.createdAt).toLocaleDateString()}</p>
+    // Find matching skills between applicant and opportunity
+    const applicantSkills = app.applicant?.skills || [];
+    const requiredSkills = app.opportunity?.skillsRequired || [];
+    const matchingSkills = applicantSkills.filter(s =>
+        requiredSkills.map(r => r.toLowerCase()).includes(s.toLowerCase())
+    );
+    const missingSkills = requiredSkills.filter(s =>
+        !applicantSkills.map(a => a.toLowerCase()).includes(s.toLowerCase())
+    );
 
-                {/* Accept / Reject buttons — only show if still pending */}
-                {app.status === 'pending' && (
-                    <div className="flex gap-2 mt-3">
-                        <button
-                            onClick={() => handleStatus('accepted')}
-                            disabled={loading}
-                            className="px-4 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 disabled:opacity-50 transition"
-                        >
-                            ✓ Accept
-                        </button>
-                        <button
-                            onClick={() => handleStatus('rejected')}
-                            disabled={loading}
-                            className="px-4 py-1.5 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 disabled:opacity-50 transition"
-                        >
-                            ✕ Reject
-                        </button>
+    return (
+        <>
+            <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg border">
+                <div className="w-10 h-10 rounded-full bg-[#e8f5f1] flex items-center justify-center text-[#2F5373] font-bold flex-shrink-0">
+                    {app.applicant?.name?.charAt(0) || '?'}
+                </div>
+                <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h4 className="font-semibold text-[#2F5373]">{app.applicant?.name || 'Applicant'}</h4>
+                            <p className="text-sm text-gray-500">{app.applicant?.email}</p>
+                            <p className="text-sm text-gray-600 mt-0.5">Applied for: <span className="font-medium">{app.opportunity?.title}</span></p>
+                        </div>
+                        <StatusBadge status={app.status} />
                     </div>
-                )}
+                    <p className="text-xs text-gray-400 mt-1">{new Date(app.createdAt).toLocaleDateString()}</p>
+
+                    <div className="flex gap-2 mt-3">
+                        {/* Details button always visible */}
+                        <button
+                            onClick={() => setShowDetails(true)}
+                            className="px-4 py-1.5 bg-[#2F5373] text-white text-xs font-medium rounded-md hover:bg-[#1a3b55] transition"
+                        >
+                            Details
+                        </button>
+
+                        {/* Accept / Reject — only when pending */}
+                        {app.status === 'pending' && (
+                            <>
+                                <button
+                                    onClick={() => handleStatus('accepted')}
+                                    disabled={loading}
+                                    className="px-4 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                                >
+                                    ✓ Accept
+                                </button>
+                                <button
+                                    onClick={() => handleStatus('rejected')}
+                                    disabled={loading}
+                                    className="px-4 py-1.5 bg-red-500 text-white text-xs font-medium rounded-md hover:bg-red-600 disabled:opacity-50 transition"
+                                >
+                                    ✕ Reject
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
             </div>
-        </div>
+
+            {/* Details Modal */}
+            {showDetails && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold text-[#2F5373]">{app.applicant?.name}'s Application</h3>
+                            <button onClick={() => setShowDetails(false)} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+                        </div>
+
+                        <p className="text-sm text-gray-500 mb-4">Applied for: <span className="font-medium text-[#2F5373]">{app.opportunity?.title}</span></p>
+
+                        {/* Cover Letter */}
+                        <div className="mb-5">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-2">Cover Letter</h4>
+                            {app.coverLetter ? (
+                                <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3 italic">"{app.coverLetter}"</p>
+                            ) : (
+                                <p className="text-sm text-gray-400 italic">No cover letter provided.</p>
+                            )}
+                        </div>
+
+                        {/* Matching Skills */}
+                        <div className="mb-5">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                                Skill Match — <span className="text-[#6CBBA2]">{matchingSkills.length}</span> of {requiredSkills.length} required skills
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                                {requiredSkills.map((skill, idx) => {
+                                    const matched = applicantSkills.map(s => s.toLowerCase()).includes(skill.toLowerCase());
+                                    return (
+                                        <span key={idx} className={`text-xs px-3 py-1 rounded-full font-medium ${
+                                            matched
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-red-50 text-red-400'
+                                        }`}>
+                                            {matched ? '✓' : '✕'} {skill}
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                            {requiredSkills.length === 0 && (
+                                <p className="text-sm text-gray-400">No skills listed for this opportunity.</p>
+                            )}
+                        </div>
+
+                        {/* Applicant Skills */}
+                        {applicantSkills.length > 0 && (
+                            <div className="mb-5">
+                                <h4 className="text-sm font-semibold text-gray-700 mb-2">All Applicant Skills</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {applicantSkills.map((skill, idx) => (
+                                        <span key={idx} className="text-xs px-3 py-1 rounded-full bg-[#e8f5f1] text-[#2F5373] font-medium">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Actions in modal too */}
+                        {app.status === 'pending' && (
+                            <div className="flex gap-3 mt-4 pt-4 border-t">
+                                <button
+                                    onClick={() => { handleStatus('accepted'); setShowDetails(false); }}
+                                    disabled={loading}
+                                    className="flex-1 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 disabled:opacity-50 transition"
+                                >
+                                    ✓ Accept
+                                </button>
+                                <button
+                                    onClick={() => { handleStatus('rejected'); setShowDetails(false); }}
+                                    disabled={loading}
+                                    className="flex-1 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600 disabled:opacity-50 transition"
+                                >
+                                    ✕ Reject
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 

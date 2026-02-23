@@ -2,11 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
-
-const PREDEFINED_SKILLS = [
-    'React', 'Node.js', 'JavaScript', 'Python', 'TypeScript',
-    'MongoDB', 'Figma', 'Communication', 'Leadership', 'Project Management',
-];
+import { PREDEFINED_SKILLS } from '../constants/skills';
 
 const CreateOpportunity = () => {
     const navigate = useNavigate();
