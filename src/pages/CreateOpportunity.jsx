@@ -14,6 +14,8 @@ const CreateOpportunity = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
+    const today = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+
     const filteredSkills = PREDEFINED_SKILLS.filter(
         (skill) => skill.toLowerCase().includes(skillSearch.toLowerCase()) && !formData.skillsRequired.includes(skill)
     );
@@ -46,6 +48,7 @@ const CreateOpportunity = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (formData.skillsRequired.length === 0) { toast.error('Please add at least one skill.'); return; }
+        if (formData.deadline && formData.deadline < today) { toast.error('Deadline cannot be in the past.'); return; }
         try {
             await api.post('/opportunities', formData);
             toast.success('Opportunity created successfully!');
@@ -145,6 +148,7 @@ const CreateOpportunity = () => {
                             <div>
                                 <label className={labelClass}>Deadline</label>
                                 <input type="date" name="deadline" value={formData.deadline} onChange={handleChange}
+                                    min={today}
                                     className={inputClass} />
                             </div>
                         </div>
