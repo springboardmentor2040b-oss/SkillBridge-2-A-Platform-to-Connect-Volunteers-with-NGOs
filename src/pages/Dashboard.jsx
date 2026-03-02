@@ -77,7 +77,7 @@ const Dashboard = () => {
                         <SidebarItem icon={<LayoutDashboard size={18} />} label="Dashboard" active href="/dashboard" />
                         <SidebarItem icon={<Search size={18} />} label={isNGO ? 'Opportunities' : 'Browse Opportunities'} href="/opportunities" />
                         <SidebarItem icon={<FileText size={18} />} label={isNGO ? 'Applications' : 'My Applications'} href="#" />
-                        <SidebarItem icon={<MessageSquare size={18} />} label="Messages" href="#" />
+                        <SidebarItem icon={<MessageSquare size={18} />} label="Messages" href="/messages" />
                     </nav>
                     <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
                         <h3 className="text-xs font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider mb-3">

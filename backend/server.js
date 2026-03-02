@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import opportunityRoutes from './routes/opportunities.js';
 import applicationRoutes from './routes/applicationRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/opportunities', opportunityRoutes);
 app.use('/api/applications', applicationRoutes);
+app.use('/api/messages', messageRoutes);
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('MongoDB Connected'))

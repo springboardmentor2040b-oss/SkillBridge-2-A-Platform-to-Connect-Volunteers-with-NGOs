@@ -1,5 +1,6 @@
 import Application from '../models/Application.js';
 import Opportunity from '../models/Opportunity.js';
+import { createConversationOnAccept } from './messageController.js';
 import { successResponse, errorResponse } from '../utils/responseHandler.js';
 
 // @desc    Apply to an opportunity
@@ -105,6 +106,15 @@ export const updateApplicationStatus = async (req, res) => {
 
         application.status = status;
         await application.save();
+
+        // Auto-create conversation when accepted
+        if (status === 'accepted') {
+            await createConversationOnAccept(
+                req.user.id,
+                application.applicant.toString(),
+                application.opportunity._id.toString()
+            );
+        }
 
         return successResponse(res, application, 'Application status updated');
     } catch (error) {
