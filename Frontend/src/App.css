@@ -1,0 +1,104 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f4f6f9;
+}
+
+/* Navbar */
+.navbar {
+  padding: 20px 40px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+}
+
+.logo-section h2 {
+  color: #2f6fed;
+  font-weight: 600;
+}
+
+/* Main Container */
+.main-container {
+  height: 85vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Form Box */
+.form-box {
+  background: #ffffff;
+  padding: 35px;
+  width: 380px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.form-box h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.form-box label {
+  font-size: 14px;
+  display: block;
+  margin-bottom: 5px;
+  margin-top: 10px;
+}
+
+.form-box input,
+.form-box select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background-color: #f1f3f6;
+  outline: none;
+}
+
+.form-box input:focus,
+.form-box select:focus {
+  border: 1px solid #2f6fed;
+  background-color: #ffffff;
+}
+
+/* Button */
+.form-box button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 20px;
+  background-color: #2f6fed;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.form-box button:hover {
+  background-color: #1e56c7;
+}
+
+/* Link */
+.link {
+  color: #2f6fed;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.form-box p {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
