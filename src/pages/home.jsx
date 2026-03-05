@@ -42,7 +42,7 @@ const Home = () => {
               <a href="/opportunities" className="flex-1 sm:border-r border-b sm:border-b-0 border-slate-200 dark:border-slate-700">
                 <div className="p-6 sm:p-8 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition">
                   <img
-                    src="/search.jpeg"
+                    src="/search.png"
                     alt="Search"
                     className="w-16 h-12 mb-3 mx-auto object-contain rounded"
                   />
@@ -59,7 +59,7 @@ const Home = () => {
               <a href="/NGOs" className="flex-1">
                 <div className="p-6 sm:p-8 text-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition">
                   <img
-                    src="/handshake.jpeg"
+                    src="/handshake.png"
                     alt="Handshake"
                     className="w-16 h-12 mb-3 mx-auto object-contain rounded"
                   />

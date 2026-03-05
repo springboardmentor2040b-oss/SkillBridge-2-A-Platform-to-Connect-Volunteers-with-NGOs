@@ -110,7 +110,7 @@ export const createConversationOnAccept = async (ngoId, volunteerId, opportunity
         const welcomeMessage = await Message.create({
             conversation: conversation._id,
             sender: ngoId,
-            content: '🎉 Congratulations! Your application has been accepted. Welcome to the team! Feel free to message us here.',
+            content: 'Congratulations!🎉 Your application has been accepted. Welcome to the team! Feel free to message us here.',
         });
 
         await Conversation.findByIdAndUpdate(conversation._id, {

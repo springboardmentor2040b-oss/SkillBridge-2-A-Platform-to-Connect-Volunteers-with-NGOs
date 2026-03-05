@@ -35,7 +35,7 @@ const Navbar = () => {
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-2 min-w-0">
                         <img
-                            src="/logo.jpeg"
+                            src="/logo.png"
                             alt="SkillBridge Logo"
                             className="w-[60px] sm:w-[75px] h-auto object-contain"
                         />
