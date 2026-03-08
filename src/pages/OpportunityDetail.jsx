@@ -17,20 +17,31 @@ const OpportunityDetail = () => {
     const [showModal, setShowModal] = useState(false);
     const [coverLetter, setCoverLetter] = useState('');
     const [alreadyApplied, setAlreadyApplied] = useState(false);
+    const [applicationStatus, setApplicationStatus] = useState(null); // 'pending' | 'accepted' | 'rejected'
 
     useEffect(() => {
-        const fetchOpportunity = async () => {
+        const fetchData = async () => {
             try {
                 const res = await api.get(`/opportunities/${id}`);
                 setOpportunity(res.data.data);
+
+                // Check volunteer's existing application status
+                if (user && user.role !== 'NGO') {
+                    const appRes = await api.get('/applications/my');
+                    const existing = appRes.data.data.find(app => app.opportunity._id === id);
+                    if (existing) {
+                        setAlreadyApplied(true);
+                        setApplicationStatus(existing.status);
+                    }
+                }
             } catch (error) {
                 console.error('Failed to fetch opportunity', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchOpportunity();
-    }, [id]);
+        fetchData();
+    }, [id, user]);
 
     const handleApply = async () => {
         if (!user) { toast.error('Please log in to apply.'); navigate('/login'); return; }
@@ -39,6 +50,7 @@ const OpportunityDetail = () => {
             await api.post(`/applications/${id}`, { coverLetter });
             toast.success('Application submitted successfully!');
             setAlreadyApplied(true);
+            setApplicationStatus('pending');
             setShowModal(false);
         } catch (error) {
             const msg = error.response?.data?.message || 'Failed to submit application';
@@ -47,6 +59,15 @@ const OpportunityDetail = () => {
         } finally {
             setApplying(false);
         }
+    };
+
+    // Button label and style based on application status
+    const getApplyButtonProps = () => {
+        if (opportunity?.status === 'Closed') return { label: 'Applications Closed', disabled: true, style: 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-not-allowed' };
+        if (!alreadyApplied) return { label: 'Apply Now', disabled: false, style: 'bg-[#2F5373] dark:bg-[#6CBBA2] text-white hover:bg-[#1a3b55] dark:hover:bg-[#5aaa91]' };
+        if (applicationStatus === 'pending') return { label: '⏳ Application Pending', disabled: true, style: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 cursor-default' };
+        if (applicationStatus === 'accepted') return { label: '✓ Application Accepted', disabled: true, style: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 cursor-default' };
+        if (applicationStatus === 'rejected') return { label: '✕ Application Rejected', disabled: true, style: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 cursor-default' };
     };
 
     if (loading) return (
@@ -69,13 +90,13 @@ const OpportunityDetail = () => {
 
     const isCreator = user?.id === opportunity.postedBy?._id || user?._id === opportunity.postedBy?._id;
     const canApply = user && !isCreator;
+    const applyBtn = getApplyButtonProps();
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
             <Navbar />
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                {/* Back Button */}
                 <div className="flex items-center gap-3 mb-6">
                     <button onClick={() => navigate('/opportunities')}
                         className="flex items-center gap-2 text-gray-500 dark:text-slate-400 hover:text-[#2F5373] dark:hover:text-white transition text-sm">
@@ -95,9 +116,9 @@ const OpportunityDetail = () => {
                             </div>
                         </div>
                         <span className={`self-start text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap ${opportunity.status === 'Open'
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                            }`}>
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                        }`}>
                             {opportunity.status}
                         </span>
                     </div>
@@ -132,15 +153,11 @@ const OpportunityDetail = () => {
 
                     {/* Apply Button */}
                     {canApply && (
-                        <button onClick={() => !alreadyApplied && setShowModal(true)}
-                            disabled={alreadyApplied || opportunity.status === 'Closed'}
-                            className={`w-full py-3 rounded-xl font-semibold text-base transition ${alreadyApplied
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 cursor-default'
-                                    : opportunity.status === 'Closed'
-                                        ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-not-allowed'
-                                        : 'bg-[#2F5373] dark:bg-[#6CBBA2] text-white hover:bg-[#1a3b55] dark:hover:bg-[#5aaa91]'
-                                }`}>
-                            {alreadyApplied ? '✓ Already Applied' : opportunity.status === 'Closed' ? 'Applications Closed' : 'Apply Now'}
+                        <button
+                            onClick={() => !alreadyApplied && opportunity.status !== 'Closed' && setShowModal(true)}
+                            disabled={applyBtn.disabled}
+                            className={`w-full py-3 rounded-xl font-semibold text-base transition ${applyBtn.style}`}>
+                            {applyBtn.label}
                         </button>
                     )}
                     {isCreator && (

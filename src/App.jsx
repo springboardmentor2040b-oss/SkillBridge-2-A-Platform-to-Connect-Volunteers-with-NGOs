@@ -7,7 +7,11 @@ import NGOs from "./pages/NGOs";
 import Dashboard from "./pages/Dashboard";
 import CreateOpportunity from "./pages/CreateOpportunity";
 import OpportunityDetail from "./pages/OpportunityDetail";
+import EditOpportunity from "./pages/EditOpportunity";
+
+
 import Messages from "./pages/Messages";
+
 
 function App() {
   return (
@@ -24,7 +28,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         
         <Route path="/create-opportunity/:id?" element={<CreateOpportunity />} />
-        <Route path="/edit-opportunity/:id" element={<CreateOpportunity />} />
+        <Route path="/edit-opportunity/:id" element={<EditOpportunity />} />
         <Route path="/messages" element={<Messages />} />
 
       </Routes>
