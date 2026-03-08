@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
 import { toast } from 'react-toastify';
 import { PREDEFINED_SKILLS } from '../constants/skills';
@@ -7,6 +7,8 @@ import Navbar from '../components/Navbar';
 
 const CreateOpportunity = () => {
     const navigate = useNavigate();
+    const { id } = useParams();
+    console.log("Opportunity ID:", id);
     const [formData, setFormData] = useState({
         title: '', description: '', skillsRequired: [], location: '', deadline: ''
     });
@@ -32,6 +34,34 @@ const CreateOpportunity = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+     useEffect(() => {
+    const fetchOpportunity = async () => {
+        try {
+            const res = await api.get(`/opportunities/${id}`);
+
+            console.log("Opportunity Data:", res.data);
+
+            const opp = res.data;
+
+            setFormData({
+                title: opp.title || "",
+                description: opp.description || "",
+                skillsRequired: opp.skillsRequired || [],
+                location: opp.location || "",
+                deadline: opp.deadline ? opp.deadline.split("T")[0] : ""
+            });
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to load opportunity");
+        }
+    };
+
+    if (id) {
+        fetchOpportunity();
+    }
+}, [id]);
+
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const handleAddSkill = (skill) => {
@@ -46,17 +76,36 @@ const CreateOpportunity = () => {
         setFormData({ ...formData, skillsRequired: formData.skillsRequired.filter(s => s !== skillToRemove) });
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (formData.skillsRequired.length === 0) { toast.error('Please add at least one skill.'); return; }
-        if (formData.deadline && formData.deadline < today) { toast.error('Deadline cannot be in the past.'); return; }
-        try {
+    e.preventDefault();
+
+    if (formData.skillsRequired.length === 0) {
+        toast.error('Please add at least one skill.');
+        return;
+    }
+
+    if (formData.deadline && formData.deadline < today) {
+        toast.error('Deadline cannot be in the past.');
+        return;
+    }
+
+    try {
+
+        if (id) {
+            // EDIT MODE
+            await api.put(`/opportunities/${id}`, formData);
+            toast.success('Opportunity updated successfully!');
+        } else {
+            // CREATE MODE
             await api.post('/opportunities', formData);
             toast.success('Opportunity created successfully!');
-            navigate('/dashboard');
-        } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to create opportunity');
         }
-    };
+
+        navigate('/dashboard');
+
+    } catch (error) {
+        toast.error(error.response?.data?.message || 'Operation failed');
+    }
+};
 
     const inputClass = "w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#6CBBA2] outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 transition";
     const labelClass = "block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1";
@@ -66,7 +115,9 @@ const CreateOpportunity = () => {
             <Navbar />
             <div className="flex justify-center py-10 px-4">
                 <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-2xl shadow-lg w-full max-w-2xl">
-                    <h2 className="text-2xl font-bold text-[#2F5373] dark:text-white mb-6">Create New Opportunity</h2>
+                <h2 className="text-2xl font-bold text-[#2F5373] dark:text-white mb-6">
+{id ? "Edit Opportunity" : "Create New Opportunity"}
+</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Title */}
@@ -159,10 +210,11 @@ const CreateOpportunity = () => {
                                 className="flex-1 px-4 py-2.5 border border-slate-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition">
                                 Cancel
                             </button>
-                            <button type="submit"
+                            <button
+                                type="submit"
                                 className="flex-1 px-4 py-2.5 bg-[#6CBBA2] text-white rounded-lg hover:bg-[#5aa890] font-semibold transition">
-                                Create Opportunity
-                            </button>
+                                {id ? "Update Opportunity" : "Create Opportunity"} 
+                           </button>
                         </div>
                     </form>
                 </div>

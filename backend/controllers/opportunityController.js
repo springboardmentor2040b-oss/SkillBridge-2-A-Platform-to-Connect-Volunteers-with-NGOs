@@ -93,3 +93,53 @@ export const getMyOpportunities = async (req, res) => {
         return errorResponse(res, 'Failed to retrieve your opportunities', 500, error);
     }
 };
+
+export const updateOpportunity = async (req, res) => {
+    try {
+
+        const opportunity = await Opportunity.findById(req.params.id);
+
+        if (!opportunity) {
+            return errorResponse(res, "Opportunity not found", 404);
+        }
+
+        // Only the NGO who created it can edit
+        if (opportunity.postedBy.toString() !== req.user.id) {
+            return errorResponse(res, "Not authorized to edit this opportunity", 403);
+        }
+
+        const updatedOpportunity = await Opportunity.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+
+        return successResponse(res, updatedOpportunity, "Opportunity updated successfully");
+
+    } catch (error) {
+        return errorResponse(res, "Failed to update opportunity", 500, error);
+    }
+};
+
+export const deleteOpportunity = async (req, res) => {
+    try {
+
+        const opportunity = await Opportunity.findById(req.params.id);
+
+        if (!opportunity) {
+            return errorResponse(res, "Opportunity not found", 404);
+        }
+
+        // Only creator NGO can delete
+        if (opportunity.postedBy.toString() !== req.user.id) {
+            return errorResponse(res, "Not authorized to delete this opportunity", 403);
+        }
+
+        await opportunity.deleteOne();
+
+        return successResponse(res, null, "Opportunity deleted successfully");
+
+    } catch (error) {
+        return errorResponse(res, "Failed to delete opportunity", 500, error);
+    }
+};
