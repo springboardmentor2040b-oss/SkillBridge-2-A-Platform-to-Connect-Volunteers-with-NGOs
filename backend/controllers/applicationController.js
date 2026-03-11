@@ -2,6 +2,7 @@ import Application from '../models/Application.js';
 import Opportunity from '../models/Opportunity.js';
 import { createConversationOnAccept } from './messageController.js';
 import { successResponse, errorResponse } from '../utils/responseHandler.js';
+import { createNotification } from './notificationController.js';
 
 // @desc    Apply to an opportunity
 // @route   POST /api/applications/:opportunityId
@@ -38,9 +39,17 @@ export const applyToOpportunity = async (req, res) => {
         });
 
         await application.populate([
-            { path: 'opportunity', select: 'title location' },
+            { path: 'opportunity', select: 'title location postedBy' },
             { path: 'applicant', select: 'name email' },
         ]);
+
+        // Notify the NGO who posted the opportunity
+        await createNotification(
+            application.opportunity.postedBy,
+            'message',
+            `${application.applicant.name} applied to "${application.opportunity.title}"`,
+            '/dashboard'
+        );
 
         return successResponse(res, application, 'Application submitted successfully', 201);
     } catch (error) {
@@ -115,6 +124,17 @@ export const updateApplicationStatus = async (req, res) => {
                 application.opportunity._id.toString()
             );
         }
+
+        // Notify the volunteer about the decision
+        const statusMsg = status === 'accepted'
+            ? `🎉 Your application for "${application.opportunity.title}" was accepted!`
+            : `Your application for "${application.opportunity.title}" was not selected.`;
+        await createNotification(
+            application.applicant,
+            'message',
+            statusMsg,
+            '/dashboard'
+        );
 
         return successResponse(res, application, 'Application status updated');
     } catch (error) {
