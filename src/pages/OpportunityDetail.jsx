@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { useNotification } from '../context/NotificationContext';
 import api from '../utils/api';
 import { MapPin, Clock, ArrowLeft, User, X } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -10,6 +11,7 @@ const OpportunityDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
+    const { refresh } = useNotification();
 
     const [opportunity, setOpportunity] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -52,6 +54,7 @@ const OpportunityDetail = () => {
             setAlreadyApplied(true);
             setApplicationStatus('pending');
             setShowModal(false);
+            refresh(); // instantly fetches the new notification!
         } catch (error) {
             const msg = error.response?.data?.message || 'Failed to submit application';
             if (msg.includes('already applied')) setAlreadyApplied(true);
@@ -118,7 +121,7 @@ const OpportunityDetail = () => {
                         <span className={`self-start text-sm px-3 py-1 rounded-full font-medium whitespace-nowrap ${opportunity.status === 'Open'
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                             : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                        }`}>
+                            }`}>
                             {opportunity.status}
                         </span>
                     </div>

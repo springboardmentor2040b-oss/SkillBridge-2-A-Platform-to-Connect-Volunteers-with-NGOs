@@ -52,6 +52,14 @@ export const applyToOpportunity = async (req, res) => {
             '/dashboard'
         );
 
+        // Notify the user who applied
+        await createNotification(
+            application.applicant._id,
+            'message',
+            `You successfully applied to "${application.opportunity.title}"`,
+            '/dashboard'
+        );
+
         return successResponse(res, application, 'Application submitted successfully', 201);
     } catch (error) {
         return errorResponse(res, 'Failed to submit application', 500, error);
