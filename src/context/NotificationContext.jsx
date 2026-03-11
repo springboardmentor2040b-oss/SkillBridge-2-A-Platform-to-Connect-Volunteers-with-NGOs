@@ -23,6 +23,7 @@ export const NotificationProvider = ({ children }) => {
     useEffect(() => {
         if (user) {
             // Fetch immediately when user logs in
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             fetchNotifications();
             // Poll every 15s for quicker updates
             intervalRef.current = setInterval(fetchNotifications, 15000);

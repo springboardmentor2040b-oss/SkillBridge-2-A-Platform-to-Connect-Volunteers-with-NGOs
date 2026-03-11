@@ -31,7 +31,7 @@ const EditOpportunity = () => {
                     location: opp.location || '',
                     deadline: opp.deadline ? opp.deadline.split('T')[0] : '',
                 });
-            } catch (err) {
+            } catch {
                 toast.error('Failed to load opportunity');
                 navigate('/opportunities');
             } finally {

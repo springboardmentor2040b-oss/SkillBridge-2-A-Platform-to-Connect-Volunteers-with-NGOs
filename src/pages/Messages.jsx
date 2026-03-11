@@ -11,7 +11,7 @@ const Messages = () => {
     const [selectedConv, setSelectedConv] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [loading, setLoading] = useState(true);
+
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef(null);
 
@@ -22,8 +22,6 @@ const Messages = () => {
                 setConversations(res.data.data);
             } catch (err) {
                 console.error('Failed to fetch conversations', err);
-            } finally {
-                setLoading(false);
             }
         };
         if (user) fetchConversations();

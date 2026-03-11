@@ -51,7 +51,7 @@ const Navbar = () => {
 
     const recent5 = notifications.slice(0, 5);
 
-    const BellButton = ({ mobile = false }) => (
+    const renderBellButton = (mobile = false) => (
         user ? (
             <div className={`relative ${mobile ? '' : ''}`} ref={mobile ? null : bellRef}>
                 <button
@@ -165,7 +165,7 @@ const Navbar = () => {
                         </button>
 
                         {/* Bell */}
-                        <BellButton />
+                        {renderBellButton()}
 
                         {user ? (
                             <button
@@ -202,7 +202,7 @@ const Navbar = () => {
                         </button>
                         {/* Mobile Bell */}
                         <div ref={bellRef}>
-                            <BellButton mobile />
+                            {renderBellButton(true)}
                         </div>
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
