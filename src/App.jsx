@@ -11,7 +11,7 @@ import EditOpportunity from "./pages/EditOpportunity";
 
 
 import Messages from "./pages/Messages";
-
+import Notifications from "./pages/Notifications";
 
 function App() {
   return (
@@ -26,10 +26,11 @@ function App() {
         <Route path="/opportunities/:id" element={<OpportunityDetail />} />
         <Route path="/NGOs" element={<NGOs />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        
+
         <Route path="/create-opportunity/:id?" element={<CreateOpportunity />} />
         <Route path="/edit-opportunity/:id" element={<EditOpportunity />} />
         <Route path="/messages" element={<Messages />} />
+        <Route path="/notifications" element={<Notifications />} />
 
       </Routes>
 

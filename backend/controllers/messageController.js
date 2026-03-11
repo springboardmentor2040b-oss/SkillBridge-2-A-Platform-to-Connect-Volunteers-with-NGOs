@@ -1,6 +1,7 @@
 import Conversation from '../models/Conversation.js';
 import Message from '../models/Message.js';
 import { successResponse, errorResponse } from '../utils/responseHandler.js';
+import { createNotification } from './notificationController.js';
 
 // Get all conversations for logged in user
 export const getConversations = async (req, res) => {
@@ -83,6 +84,21 @@ export const sendMessage = async (req, res) => {
         });
 
         await message.populate('sender', 'name ngoName');
+
+        // Notify the OTHER participant in the conversation
+        const senderIdStr = req.user.id.toString();
+        const recipientId = conversation.participants.find(
+            (p) => p.toString() !== senderIdStr
+        );
+        if (recipientId) {
+            const senderName = message.sender?.name || message.sender?.ngoName || 'Someone';
+            await createNotification(
+                recipientId,
+                'message',
+                `${senderName} sent you a new message`,
+                '/messages'
+            );
+        }
 
         return successResponse(res, message, 'Message sent successfully', 201);
     } catch (error) {

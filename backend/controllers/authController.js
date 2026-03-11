@@ -2,6 +2,8 @@ import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { successResponse, errorResponse, validationError } from '../utils/responseHandler.js';
+import Opportunity from '../models/Opportunity.js';
+import { createNotification } from './notificationController.js';
 
 export const register = async (req, res) => {
     try {
@@ -39,6 +41,24 @@ export const register = async (req, res) => {
 
         const newUser = new User(userData);
         await newUser.save();
+
+        // If a Volunteer registered with skills, notify NGOs whose open opportunities match
+        if (role === 'Volunteer' && skills && skills.length > 0) {
+            const skillRegexes = skills.map(s => new RegExp(`^${s}$`, 'i'));
+            const matchingOpps = await Opportunity.find({
+                status: 'Open',
+                skillsRequired: { $elemMatch: { $in: skillRegexes } },
+            }).select('_id title postedBy');
+
+            for (const opp of matchingOpps) {
+                await createNotification(
+                    opp.postedBy,
+                    'skill_match',
+                    `A new volunteer with matching skills joined: "${name}" — for "${opp.title}"`,
+                    `/opportunities/${opp._id}`
+                );
+            }
+        }
 
         successResponse(res, { user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role } }, 'User registered successfully', 201);
     } catch (error) {

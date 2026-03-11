@@ -1,5 +1,7 @@
 import Opportunity from '../models/Opportunity.js';
+import User from '../models/User.js';
 import { successResponse, errorResponse } from '../utils/responseHandler.js';
+import { createNotification } from './notificationController.js';
 
 // Helper: auto-close opportunities past their deadline
 const autoCloseExpired = async () => {
@@ -23,6 +25,24 @@ export const createOpportunity = async (req, res) => {
         });
 
         await newOpportunity.save();
+
+        // Notify volunteers whose skills match the new opportunity (fire-and-forget)
+        if (skillsRequired && skillsRequired.length > 0) {
+            const skillRegexes = skillsRequired.map(s => new RegExp(`^${s}$`, 'i'));
+            const matchingVolunteers = await User.find({
+                role: 'Volunteer',
+                skills: { $elemMatch: { $in: skillRegexes } },
+            }).select('_id');
+
+            for (const volunteer of matchingVolunteers) {
+                await createNotification(
+                    volunteer._id,
+                    'skill_match',
+                    `New opportunity matching your skills: "${title}"`,
+                    `/opportunities/${newOpportunity._id}`
+                );
+            }
+        }
 
         return successResponse(res, newOpportunity, 'Opportunity created successfully', 201);
     } catch (error) {
