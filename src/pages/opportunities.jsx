@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import api from "../utils/api";
 import { MapPin, Clock, Search, X, SlidersHorizontal, ArrowLeft } from "lucide-react";
 import { PREDEFINED_SKILLS } from "../constants/skills";
+import Navbar from "../components/Navbar";
 
 const Opportunities = () => {
 
@@ -75,8 +76,9 @@ const Opportunities = () => {
   const hasFilters = search || selectedSkills.length > 0 || locationFilter || statusFilter;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+      <Navbar />
+      <div className="max-w-6xl mx-auto p-8">
 
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
