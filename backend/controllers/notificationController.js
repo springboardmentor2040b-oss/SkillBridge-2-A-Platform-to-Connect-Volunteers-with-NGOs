@@ -4,7 +4,9 @@ import { successResponse, errorResponse } from '../utils/responseHandler.js';
 // Shared helper — fire and forget (called internally, not via HTTP)
 export const createNotification = async (recipient, type, message, link = '/') => {
     try {
-        await Notification.create({ recipient, type, message, link });
+        const notif = await Notification.create({ recipient, type, message, link });
+        console.log(`[Notification] Created for recipient ${recipient}: "${message}"`);
+        return notif;
     } catch (err) {
         console.error('Failed to create notification:', err);
     }
@@ -16,6 +18,7 @@ export const getNotifications = async (req, res) => {
         const notifications = await Notification.find({ recipient: req.user.id })
             .sort({ createdAt: -1 })
             .limit(50);
+        console.log(`[Notification] GET for user ${req.user.id}: ${notifications.length} found`);
         return successResponse(res, notifications, 'Notifications retrieved successfully');
     } catch (error) {
         return errorResponse(res, 'Failed to fetch notifications', 500, error);

@@ -39,13 +39,14 @@ export const applyToOpportunity = async (req, res) => {
         });
 
         await application.populate([
-            { path: 'opportunity', select: 'title location postedBy' },
+            { path: 'opportunity', select: 'title location' },
             { path: 'applicant', select: 'name email' },
         ]);
 
         // Notify the NGO who posted the opportunity
+        // (use `opportunity` fetched at top of function — guaranteed to have postedBy)
         await createNotification(
-            application.opportunity.postedBy,
+            opportunity.postedBy,
             'message',
             `${application.applicant.name} applied to "${application.opportunity.title}"`,
             '/dashboard'
