@@ -84,17 +84,16 @@ const Opportunities = () => {
         <div className="flex items-start justify-between mb-6">
           <div>
             <button onClick={() => navigate("/")}
-              className="text-sm text-gray-400 hover:text-[#2F5373] mb-2 flex items-center gap-1 transition">
+              className="text-sm text-gray-400 dark:text-slate-500 hover:text-[#2F5373] dark:hover:text-white mb-2 flex items-center gap-1 transition">
               <ArrowLeft size={15} /> Back to Home
             </button>
-            {/* Fix 1: correct title based on role */}
-            <h1 className="text-3xl font-bold text-[#2F5373] mb-1">
+            <h1 className="text-3xl font-bold text-[#2F5373] dark:text-white mb-1">
               {user?.role === "NGO" ? "All Opportunities" : "Volunteer Opportunities"}
             </h1>
-            <p className="text-gray-600">Find meaningful projects and contribute your skills.</p>
+            <p className="text-gray-600 dark:text-slate-400">Find meaningful projects and contribute your skills.</p>
           </div>
           <button onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm text-gray-600 hover:bg-white hover:shadow-sm transition">
+            className="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-lg text-sm text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:shadow-sm transition">
             <SlidersHorizontal size={16} />
             {showFilters ? "Hide" : "Show"} Filters
           </button>
@@ -102,12 +101,12 @@ const Opportunities = () => {
 
         {/* Search */}
         <div className="relative mb-4">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500" />
           <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by title, description..."
-            className="w-full pl-10 pr-10 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#6CBBA2] outline-none bg-white shadow-sm" />
+            className="w-full pl-10 pr-10 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[#6CBBA2] outline-none bg-white dark:bg-slate-800 text-slate-800 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 shadow-sm" />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-slate-500">
               <X size={16} />
             </button>
           )}
@@ -115,13 +114,17 @@ const Opportunities = () => {
 
         {/* Filters */}
         {showFilters && (
-          <div className="bg-white border rounded-lg p-4 mb-6 shadow-sm space-y-4">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-4 mb-6 shadow-sm space-y-4">
             <div>
-              <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Skills</p>
+              <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase mb-2">Skills</p>
               <div className="flex flex-wrap gap-2">
                 {PREDEFINED_SKILLS.map((skill) => (
                   <button key={skill} onClick={() => toggleSkill(skill)}
-                    className={`px-3 py-1 rounded-full text-xs border ${selectedSkills.includes(skill) ? "bg-[#2F5373] text-white" : "bg-gray-100"}`}>
+                    className={`px-3 py-1 rounded-full text-xs border transition ${
+                      selectedSkills.includes(skill)
+                        ? "bg-[#2F5373] text-white border-[#2F5373]"
+                        : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-600 hover:border-[#6CBBA2]"
+                    }`}>
                     {skill}
                   </button>
                 ))}
@@ -130,16 +133,16 @@ const Opportunities = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <input type="text" value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)}
                 placeholder="Filter by location..."
-                className="flex-1 px-4 py-2 border rounded-md text-sm focus:ring-2 focus:ring-[#6CBBA2] outline-none bg-white" />
+                className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-600 rounded-md text-sm focus:ring-2 focus:ring-[#6CBBA2] outline-none bg-white dark:bg-slate-700 text-slate-800 dark:text-white placeholder-gray-400 dark:placeholder-slate-500" />
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-[#6CBBA2] outline-none text-gray-700 bg-white">
+                className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-md text-sm focus:ring-2 focus:ring-[#6CBBA2] outline-none text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-700">
                 <option value="">All Statuses</option>
                 <option value="Open">Open</option>
                 <option value="Closed">Closed</option>
               </select>
               {hasFilters && (
                 <button onClick={clearFilters}
-                  className="flex items-center gap-1 px-4 py-2 text-sm text-red-500 border border-red-200 rounded-md hover:bg-red-50 transition whitespace-nowrap">
+                  className="flex items-center gap-1 px-4 py-2 text-sm text-red-500 border border-red-200 dark:border-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition whitespace-nowrap">
                   <X size={14} /> Clear All
                 </button>
               )}
@@ -149,9 +152,9 @@ const Opportunities = () => {
 
         {/* Cards */}
         {loading ? (
-          <div className="text-center py-20 text-gray-400">Loading opportunities...</div>
+          <div className="text-center py-20 text-gray-400 dark:text-slate-500">Loading opportunities...</div>
         ) : opportunities.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
+          <div className="text-center py-20 text-gray-400 dark:text-slate-500">
             <Search size={48} className="mx-auto mb-4 opacity-20" />
             <p>No opportunities found</p>
           </div>
@@ -160,35 +163,37 @@ const Opportunities = () => {
             {opportunities.map((opp) => {
               const isOwner = user && user.role === "NGO" && opp.postedBy?._id === user.id;
               return (
-                <div key={opp._id} className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition flex flex-col">
+                <div key={opp._id} className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 hover:shadow-md transition flex flex-col">
 
                   <div className="flex justify-between items-start mb-1">
-                    <h3 className="text-lg font-bold text-[#2F5373] leading-tight">{opp.title}</h3>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ml-2 whitespace-nowrap ${opp.status === 'Open' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                    <h3 className="text-lg font-bold text-[#2F5373] dark:text-white leading-tight">{opp.title}</h3>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ml-2 whitespace-nowrap ${
+                      opp.status === 'Open'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                    }`}>
                       {opp.status}
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-500 mb-3">{opp.postedBy?.ngoName || "NGO"}</p>
+                  <p className="text-sm text-gray-500 dark:text-slate-400 mb-3">{opp.postedBy?.ngoName || "NGO"}</p>
 
-                  {/* Fix 2: truncate long descriptions */}
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                  <p className="text-gray-600 dark:text-slate-400 text-sm mb-4 line-clamp-3">
                     {opp.description}
                   </p>
 
-                  {/* Application status badge for volunteers */}
                   {myApplications[opp._id] && (
                     <span className={`text-xs px-2 py-1 rounded-full font-medium mb-3 self-start ${
-                      myApplications[opp._id] === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                      myApplications[opp._id] === 'accepted' ? 'bg-teal-100 text-teal-700' :
-                      'bg-red-100 text-red-600'
+                      myApplications[opp._id] === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
+                      myApplications[opp._id] === 'accepted' ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400' :
+                      'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                     }`}>
                       {myApplications[opp._id] === 'pending' ? '⏳ Applied' :
                        myApplications[opp._id] === 'accepted' ? '✓ Accepted' : '✕ Rejected'}
                     </span>
                   )}
 
-                  <div className="flex items-center text-gray-400 text-xs gap-4 mt-auto mb-4">
+                  <div className="flex items-center text-gray-400 dark:text-slate-500 text-xs gap-4 mt-auto mb-4">
                     <span className="flex items-center gap-1"><MapPin size={13} /> {opp.location}</span>
                     {opp.deadline && (
                       <span className="flex items-center gap-1">
@@ -199,15 +204,15 @@ const Opportunities = () => {
 
                   <div className="flex gap-2">
                     <button onClick={() => navigate(`/opportunities/${opp._id}`)}
-                      className="flex-1 bg-[#2F5373] text-white py-2 rounded">
+                      className="flex-1 bg-[#2F5373] dark:bg-[#6CBBA2] text-white py-2 rounded-lg hover:bg-[#1a3b55] dark:hover:bg-[#5aaa91] transition text-sm font-medium">
                       View Details
                     </button>
                     {isOwner && (
                       <>
                         <button onClick={() => navigate(`/edit-opportunity/${opp._id}`)}
-                          className="px-3 bg-yellow-500 text-white rounded">Edit</button>
+                          className="px-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition text-sm">Edit</button>
                         <button onClick={() => handleDelete(opp._id)}
-                          className="px-3 bg-red-500 text-white rounded">Delete</button>
+                          className="px-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition text-sm">Delete</button>
                       </>
                     )}
                   </div>
