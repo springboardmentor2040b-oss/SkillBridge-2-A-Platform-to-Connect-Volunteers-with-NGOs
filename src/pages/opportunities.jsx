@@ -2,9 +2,10 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import api from "../utils/api";
-import { MapPin, Clock, Search, X, SlidersHorizontal, ArrowLeft } from "lucide-react";
+import { MapPin, Clock, Search, X, SlidersHorizontal, ArrowLeft, Eye, Pencil, Trash2 } from "lucide-react";
 import { PREDEFINED_SKILLS } from "../constants/skills";
 import Navbar from "../components/Navbar";
+
 
 const Opportunities = () => {
 
@@ -202,20 +203,41 @@ const Opportunities = () => {
                     )}
                   </div>
 
-                  <div className="flex gap-2">
-                    <button onClick={() => navigate(`/opportunities/${opp._id}`)}
-                      className="flex-1 bg-[#2F5373] dark:bg-[#6CBBA2] text-white py-2 rounded-lg hover:bg-[#1a3b55] dark:hover:bg-[#5aaa91] transition text-sm font-medium">
-                      View Details
-                    </button>
-                    {isOwner && (
-                      <>
-                        <button onClick={() => navigate(`/edit-opportunity/${opp._id}`)}
-                          className="px-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition text-sm">Edit</button>
-                        <button onClick={() => handleDelete(opp._id)}
-                          className="px-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition text-sm">Delete</button>
-                      </>
-                    )}
-                  </div>
+                  <div className="flex justify-end items-center gap-2 mt-2">
+
+ {/* View Icon */}
+<button
+  onClick={() => navigate(`/opportunities/${opp._id}`)}
+  className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+  title="View Details"
+>
+  <Eye size={18} className="text-gray-500 hover:text-[#2F5373] transition" />
+</button>
+
+{isOwner && (
+  <div className="flex gap-2">
+
+    {/* Edit Icon */}
+    <button
+      onClick={() => navigate(`/edit-opportunity/${opp._id}`)}
+      className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+      title="Edit"
+    >
+      <Pencil size={18} className="text-gray-500 hover:text-[#2F5373] transition" />
+    </button>
+
+    {/* Delete Icon */}
+    <button
+      onClick={() => handleDelete(opp._id)}
+      className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition"
+      title="Delete"
+    >
+      <Trash2 size={18} className="text-red-500 hover:text-red-600 transition" />
+    </button>
+
+  </div>
+)}
+</div>
 
                 </div>
               );
