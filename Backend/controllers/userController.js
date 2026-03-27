@@ -1,71 +1,14 @@
-const User = require("../models/User");
+import User from '../models/User.js';
+import { successResponse, errorResponse, notFound } from '../utils/responseHandler.js';
 
-// REGISTER
-exports.registerUser = async (req, res) => {
-  const {
-    name,
-    email,
-    password,
-    role,
-    skills,
-    organizationName,
-    organizationDescription,
-    websiteUrl
-  } = req.body;
-
-  try {
-
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+export const getProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            return notFound(res, 'User not found');
+        }
+        successResponse(res, user, 'User profile retrieved successfully');
+    } catch (error) {
+        errorResponse(res, 'Server error', 500, error);
     }
-
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role,
-      skills,
-      organizationName,
-      organizationDescription,
-      websiteUrl
-    });
-
-    res.status(201).json({
-      message: "User registered successfully",
-      user
-    });
-
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-// LOGIN
-exports.loginUser = async (req, res) => {
-
-  const { email, password } = req.body;
-
-  try {
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
-
-    if (user.password !== password) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    res.status(200).json({
-      message: "Login successful",
-      user
-    });
-
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
-
 };

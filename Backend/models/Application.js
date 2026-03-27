@@ -1,25 +1,29 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
 const applicationSchema = new mongoose.Schema({
-  volunteerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
-  },
-  opportunityId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Opportunity",
-    required: true
-  },
-  status: {
-    type: String,
-    enum: ["pending", "accepted", "rejected"],
-    default: "pending"
-  },
-  appliedAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+    opportunity: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Opportunity',
+        required: true,
+    },
+    applicant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+    coverLetter: {
+        type: String,
+        default: '',
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'accepted', 'rejected'],
+        default: 'pending',
+    },
+}, { timestamps: true });
 
-module.exports = mongoose.model("Application", applicationSchema);
+// Prevent duplicate applications
+applicationSchema.index({ opportunity: 1, applicant: 1 }, { unique: true });
+
+const Application = mongoose.model('Application', applicationSchema);
+export default Application;
