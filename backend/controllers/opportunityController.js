@@ -1,0 +1,173 @@
+import Opportunity from '../models/Opportunity.js';
+import User from '../models/User.js';
+import { successResponse, errorResponse } from '../utils/responseHandler.js';
+import { createNotification } from './notificationController.js';
+
+// Helper: auto-close opportunities past their deadline
+const autoCloseExpired = async () => {
+    await Opportunity.updateMany(
+        { deadline: { $lt: new Date() }, status: 'Open' },
+        { $set: { status: 'Closed' } }
+    );
+};
+
+export const createOpportunity = async (req, res) => {
+    try {
+        const { title, description, skillsRequired, location, deadline } = req.body;
+
+        const newOpportunity = new Opportunity({
+            title,
+            description,
+            skillsRequired,
+            location,
+            deadline,
+            postedBy: req.user.id,
+            ngoId: req.user.ngoId,
+        });
+
+        await newOpportunity.save();
+
+        // Notify volunteers whose skills match the new opportunity (fire-and-forget)
+        if (skillsRequired && skillsRequired.length > 0) {
+            const skillRegexes = skillsRequired.map(s => new RegExp(`^${s}$`, 'i'));
+            const matchingVolunteers = await User.find({
+                role: 'Volunteer',
+                skills: { $elemMatch: { $in: skillRegexes } },
+            }).select('_id');
+
+            for (const volunteer of matchingVolunteers) {
+                await createNotification(
+                    volunteer._id,
+                    'skill_match',
+                    `New opportunity matching your skills: "${title}"`,
+                    `/opportunities/${newOpportunity._id}`
+                );
+            }
+        }
+
+        return successResponse(res, newOpportunity, 'Opportunity created successfully', 201);
+    } catch (error) {
+        return errorResponse(res, 'Failed to create opportunity', 500, error);
+    }
+};
+
+export const getAllOpportunities = async (req, res) => {
+    try {
+        // Auto-close any expired opportunities before fetching
+        await autoCloseExpired();
+
+        const { search, skills, location, status } = req.query;
+
+        const query = {};
+
+        if (status) query.status = status;
+
+        if (location) query.location = { $regex: location, $options: 'i' };
+
+        if (skills) {
+            const skillsArray = skills.split(',').map(s => s.trim()).filter(Boolean);
+            if (skillsArray.length > 0) {
+                query.skillsRequired = {
+                    $all: skillsArray.map(s => new RegExp(`^${s}$`, 'i'))
+                };
+            }
+        }
+
+        if (search) {
+            query.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+            ];
+        }
+
+        const opportunities = await Opportunity.find(query)
+            .populate('postedBy', 'name email')
+            .populate('ngoId', 'name description website')
+            .sort({ createdAt: -1 });
+
+        return successResponse(res, opportunities, 'Opportunities retrieved successfully');
+    } catch (error) {
+        return errorResponse(res, 'Failed to retrieve opportunities', 500, error);
+    }
+};
+
+export const getOpportunityById = async (req, res) => {
+    try {
+        // Auto-close if this specific opportunity is expired
+        await autoCloseExpired();
+
+        const opportunity = await Opportunity.findById(req.params.id)
+            .populate('postedBy', 'name email')
+            .populate('ngoId', 'name description website');
+        if (!opportunity) {
+            return errorResponse(res, 'Opportunity not found', 404);
+        }
+        return successResponse(res, opportunity, 'Opportunity retrieved successfully');
+    } catch (error) {
+        return errorResponse(res, 'Failed to retrieve opportunity', 500, error);
+    }
+};
+
+export const getMyOpportunities = async (req, res) => {
+    try {
+        await autoCloseExpired();
+        // Fetch all opportunities for the caller's NGO, not just the ones they posted specifically
+        const query = req.user.role === 'NGO' 
+            ? { ngoId: req.user.ngoId } 
+            : { postedBy: req.user.id }; // Fallback, though Volunteer probably doesn't post opportunities
+        const opportunities = await Opportunity.find(query);
+        return successResponse(res, opportunities, 'My opportunities retrieved successfully');
+    } catch (error) {
+        return errorResponse(res, 'Failed to retrieve your opportunities', 500, error);
+    }
+};
+
+export const updateOpportunity = async (req, res) => {
+    try {
+
+        const opportunity = await Opportunity.findById(req.params.id);
+
+        if (!opportunity) {
+            return errorResponse(res, "Opportunity not found", 404);
+        }
+
+        // Allow any member of the same NGO to edit
+        if (opportunity.ngoId.toString() !== req.user.ngoId?.toString()) {
+            return errorResponse(res, "Not authorized to edit this opportunity", 403);
+        }
+
+        const updatedOpportunity = await Opportunity.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+
+        return successResponse(res, updatedOpportunity, "Opportunity updated successfully");
+
+    } catch (error) {
+        return errorResponse(res, "Failed to update opportunity", 500, error);
+    }
+};
+
+export const deleteOpportunity = async (req, res) => {
+    try {
+
+        const opportunity = await Opportunity.findById(req.params.id);
+
+        if (!opportunity) {
+            return errorResponse(res, "Opportunity not found", 404);
+        }
+
+        // Allow any member of the same NGO to delete
+        if (opportunity.ngoId.toString() !== req.user.ngoId?.toString()) {
+            return errorResponse(res, "Not authorized to delete this opportunity", 403);
+        }
+
+        await opportunity.deleteOne();
+
+        return successResponse(res, null, "Opportunity deleted successfully");
+
+    } catch (error) {
+        return errorResponse(res, "Failed to delete opportunity", 500, error);
+    }
+};
