@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 import {
     Menu,
     X,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 const LandingPage = () => {
+    const { user } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -60,18 +62,29 @@ const LandingPage = () => {
                                 </a>
                             ))}
                             <div className="flex items-center space-x-3 ml-2 lg:ml-4">
-                                <Link
-                                    to="/login"
-                                    className="px-3 lg:px-4 py-1.5 lg:py-2 text-sm font-semibold text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all whitespace-nowrap"
-                                >
-                                    Login
-                                </Link>
-                                <Link
-                                    to="/register"
-                                    className="px-3 lg:px-4 py-1.5 lg:py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md shadow-blue-200 transition-all whitespace-nowrap"
-                                >
-                                    Get Started
-                                </Link>
+                                {user ? (
+                                    <Link
+                                        to={user.role === 'ngo' ? '/ngo-dashboard' : '/volunteer-dashboard'}
+                                        className="px-6 py-2 text-sm font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md shadow-blue-200 transition-all whitespace-nowrap"
+                                    >
+                                        Go to Dashboard
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link
+                                            to="/login"
+                                            className="px-3 lg:px-4 py-1.5 lg:py-2 text-sm font-semibold text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-all whitespace-nowrap"
+                                        >
+                                            Login
+                                        </Link>
+                                        <Link
+                                            to="/register"
+                                            className="px-3 lg:px-4 py-1.5 lg:py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-md shadow-blue-200 transition-all whitespace-nowrap"
+                                        >
+                                            Get Started
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         </div>
 
@@ -111,20 +124,32 @@ const LandingPage = () => {
                                     </a>
                                 ))}
                                 <div className="flex flex-col space-y-4 pt-6 mt-4 border-t border-gray-200">
-                                    <Link 
-                                        to="/login" 
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="w-full py-3 text-center text-lg font-bold text-blue-600 border border-blue-600 rounded-xl"
-                                    >
-                                        Login
-                                    </Link>
-                                    <Link 
-                                        to="/register" 
-                                        onClick={() => setIsMenuOpen(false)}
-                                        className="w-full py-3 text-center text-lg font-bold text-white bg-blue-600 rounded-xl shadow-lg"
-                                    >
-                                        Get Started
-                                    </Link>
+                                    {user ? (
+                                        <Link
+                                            to={user.role === 'ngo' ? '/ngo-dashboard' : '/volunteer-dashboard'}
+                                            onClick={() => setIsMenuOpen(false)}
+                                            className="w-full py-3 text-center text-lg font-bold text-white bg-blue-600 rounded-xl shadow-lg"
+                                        >
+                                            Go to Dashboard
+                                        </Link>
+                                    ) : (
+                                        <>
+                                            <Link
+                                                to="/login"
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="w-full py-3 text-center text-lg font-bold text-blue-600 border border-blue-600 rounded-xl"
+                                            >
+                                                Login
+                                            </Link>
+                                            <Link
+                                                to="/register"
+                                                onClick={() => setIsMenuOpen(false)}
+                                                className="w-full py-3 text-center text-lg font-bold text-white bg-blue-600 rounded-xl shadow-lg"
+                                            >
+                                                Get Started
+                                            </Link>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </motion.div>
@@ -152,9 +177,12 @@ const LandingPage = () => {
                                 <Link to="/register" className="px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 text-white font-bold rounded-xl text-base sm:text-lg hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all flex items-center justify-center gap-2">
                                     Get Started <ArrowRight size={18} className="sm:w-5 sm:h-5" />
                                 </Link>
-                                <button className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-800 font-bold border border-gray-200 rounded-xl text-base sm:text-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
+                                <Link
+                                    to="/opportunities"
+                                    className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-800 font-bold border border-gray-200 rounded-xl text-base sm:text-lg hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
+                                >
                                     Explore Opportunities <ChevronRight size={18} className="sm:w-5 sm:h-5" />
-                                </button>
+                                </Link>
                             </div>
                         </motion.div>
 
@@ -162,26 +190,17 @@ const LandingPage = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1, delay: 0.2 }}
-                            className="relative mt-8 lg:mt-0 max-w-md mx-auto lg:max-w-none"
+                            className="relative mt-8 lg:mt-0 w-full"
                         >
-                            <div className="w-full aspect-square bg-gradient-to-tr from-blue-100 to-indigo-100 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl relative">
-                                <div className="absolute inset-0 flex items-center justify-center opacity-40">
-                                    <Users size={120} className="sm:w-[150px] sm:h-[150px] lg:w-[200px] lg:h-[200px] text-blue-600" />
-                                </div>
-                                {/* Visual elements representing volunteering */}
-                                <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-white/60 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg p-3 sm:p-4 lg:p-6 animate-float">
-                                    <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-2 sm:mb-3 lg:mb-4">
-                                        <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm lg:text-base">SB</div>
-                                        <div className="flex-1">
-                                            <div className="h-1.5 sm:h-2 w-16 sm:w-20 lg:w-24 bg-gray-200 rounded animate-pulse mb-1 sm:mb-2"></div>
-                                            <div className="h-1.5 sm:h-2 w-12 sm:w-14 lg:w-16 bg-gray-100 rounded animate-pulse"></div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-1.5 sm:space-y-2 lg:space-y-3">
-                                        <div className="h-1.5 sm:h-2 w-full bg-gray-100 rounded"></div>
-                                        <div className="h-1.5 sm:h-2 w-full bg-gray-100 rounded"></div>
-                                        <div className="h-1.5 sm:h-2 w-2/3 bg-gray-50 rounded"></div>
-                                    </div>
+                            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-blue-100 bg-white">
+                                <img
+                                    src="/hero-collaboration.svg"
+                                    alt="Volunteers and NGOs collaborating through SkillBridge"
+                                    className="w-full h-auto object-cover"
+                                />
+                                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-white/90 backdrop-blur-sm border border-blue-100 rounded-xl px-3 py-2 shadow-sm">
+                                    <p className="text-[11px] sm:text-xs font-semibold text-blue-700">SkillBridge Network</p>
+                                    <p className="text-[10px] sm:text-xs text-gray-600">Connecting impact-driven teams</p>
                                 </div>
                             </div>
                             {/* Decorative elements */}
@@ -224,8 +243,8 @@ const LandingPage = () => {
                         >
                             <div className="mb-4 sm:mb-5 lg:mb-6 flex justify-center transform group-hover:scale-110 transition-transform">
                                 <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 flex items-center justify-center">
-                                    {React.cloneElement(item.icon, { 
-                                        size: window.innerWidth < 640 ? 28 : window.innerWidth < 1024 ? 32 : 40 
+                                    {React.cloneElement(item.icon, {
+                                        size: window.innerWidth < 640 ? 28 : window.innerWidth < 1024 ? 32 : 40
                                     })}
                                 </div>
                             </div>
@@ -354,7 +373,7 @@ const LandingPage = () => {
                                 <Mail size={14} className="sm:w-4 sm:h-4" /> contact@skillbridge.org
                             </li>
                             <li className="flex items-start gap-2 sm:gap-3 justify-center sm:justify-start text-xs sm:text-sm">
-                                <Globe size={14} className="mt-0.5 sm:w-4 sm:h-4 flex-shrink-0" /> 
+                                <Globe size={14} className="mt-0.5 sm:w-4 sm:h-4 flex-shrink-0" />
                                 <span>123 Impact Way, Social Hub, Tech City</span>
                             </li>
                         </ul>

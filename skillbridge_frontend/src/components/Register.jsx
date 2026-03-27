@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../services/api";
 
 const Register = () => {
   const [role, setRole] = useState("Volunteer");
@@ -101,46 +102,27 @@ const Register = () => {
     setIsSubmitting(true);
 
     const payload = {
-      username: formData.username,
+      name: formData.fullName,
       email: formData.email,
       password: formData.password,
-      full_name: formData.fullName,
-      role: role,
+      role: role.toLowerCase(),
       location: formData.location || null,
-      skills: formData.skills.join(", ") || null,
+      skills: role.toLowerCase() === 'volunteer' ? formData.skills : [],
       organization_name: formData.organizationName || null,
-      organization_description:
-        formData.organizationDescription || null,
+      organization_description: formData.organizationDescription || null,
       website_url: formData.website || null
     };
 
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/user/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(payload)
-        }
-      );
+      const response = await api.post("/auth/register", payload);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.data) {
         alert("Registration successful! Redirecting to login...");
         navigate("/login");
-      } else {
-        setErrors({
-          server:
-            data.detail ||
-            "Registration failed. Please try again."
-        });
       }
     } catch (error) {
       setErrors({
-        server: "Failed to connect to the server."
+        server: error.response?.data?.detail || error.response?.data?.msg || "Registration failed. Please try again."
       });
     } finally {
       setIsSubmitting(false);

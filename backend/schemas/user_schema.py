@@ -1,21 +1,43 @@
+# user_schema.py
 from pydantic import BaseModel, EmailStr
-from typing import Optional
-
+from typing import Optional, List
 
 class UserRegister(BaseModel):
-    username: str
+    name: str
     email: EmailStr
     password: str
-    role: str
-
+    role: str # 'volunteer' or 'ngo'
+    skills: Optional[List[str]] = []
+    location: Optional[str] = None
+    bio: Optional[str] = None
+    organization_name: Optional[str] = None
+    organization_description: Optional[str] = None
+    website_url: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-
 class UserResponse(BaseModel):
-    username: str
+    id: Optional[str] = None
+    name: str
     email: EmailStr
     role: str
-    message: Optional[str]
+    skills: Optional[List[str]] = []
+    location: Optional[str] = None
+    bio: Optional[str] = None
+    organization_name: Optional[str] = None
+    organization_description: Optional[str] = None
+    website_url: Optional[str] = None
+    message: Optional[str] = None
+    ngo_id: Optional[str] = None
+    role_in_ngo: Optional[str] = None
+
+class ProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    skills: Optional[List[str]] = None
+    location: Optional[str] = None
+    bio: Optional[str] = None
+    organization_name: Optional[str] = None
+    organization_description: Optional[str] = None
+    website_url: Optional[str] = None

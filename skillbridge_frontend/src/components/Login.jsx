@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -8,6 +9,8 @@ const Login = () => {
   const [role, setRole] = useState("volunteer");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { login } = useAuth();
 
   const validateForm = () => {
     if (!email || !password) {
@@ -28,43 +31,21 @@ const Login = () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    try {
-      const response = await fetch("http://localhost:8000/api/user/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          email,
-          password
-        })
-      });
+    const result = await login(email, password);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            email: data.email,
-            username: data.username,
-            role: data.role,
-            token: data.access_token
-          })
-        );
-
-        if (data.role === "Volunteer") {
-          navigate("/profile-volunteer");
-        } else if (data.role === "NGO / Organization") {
-          navigate("/profile-ngo");
-        }
+    if (result.success) {
+      console.log('Login successful, ngo_id:', result.ngo_id);
+      
+      // If user has ngo_id, they are part of NGO (either owner or member)
+      if (result.ngo_id) {
+        console.log('Redirecting to NGO dashboard');
+        navigate("/ngo-dashboard");
       } else {
-        setError(data.detail || "Login failed. Please check your credentials.");
+        console.log('Redirecting to volunteer dashboard');
+        navigate("/volunteer-dashboard");
       }
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Failed to connect to the server. Please try again.");
-    } finally {
+    } else {
+      setError(result.message);
       setIsSubmitting(false);
     }
   };
