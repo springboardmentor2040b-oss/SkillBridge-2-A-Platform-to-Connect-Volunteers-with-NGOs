@@ -20,26 +20,7 @@ function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      {/* Top Navbar */}
-      <div className="bg-white shadow px-8 py-4 flex justify-between">
-        <h1 className="font-bold text-xl">SkillBridge</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">
-            {user.role}
-          </span>
-          <button
-            onClick={() => {
-              localStorage.removeItem("user");
-              navigate("/login");
-            }}
-            className="text-red-500"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-100 pt-8">
 
       <div className="flex">
 
@@ -60,7 +41,10 @@ function Dashboard() {
             >
               Opportunities
             </li>
-            <li className="cursor-pointer hover:text-blue-600">
+            <li
+              onClick={() => navigate("/applications")}
+              className="cursor-pointer hover:text-blue-600"
+            >
               Applications
             </li>
             <li className="cursor-pointer hover:text-blue-600">

@@ -1,84 +1,68 @@
-const express = require("express");
+ const express = require("express");
 const router = express.Router();
 const Application = require("../models/Application");
 
 
-// APPLY
+// Volunteer Apply
 router.post("/apply", async (req, res) => {
+
   try {
-    const { volunteerId, opportunityId } = req.body;
 
-    const existing = await Application.findOne({
-      volunteerId,
-      opportunityId
-    });
-
-    if (existing) {
-      if (existing.status === "rejected") {
-        return res.json({
-          message: "You cannot apply again for this opportunity"
-        });
-      }
-
-      return res.json({
-        message: "You have already applied"
-      });
-    }
-
-    const application = new Application({
-      volunteerId,
-      opportunityId
-    });
+    const application = new Application(req.body);
 
     await application.save();
 
-    res.json({
-      message: "Application submitted successfully"
-    });
+    res.json(application);
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+
+    res.status(500).json({ message: error.message });
+
   }
-});
-
-
-// GET USER APPLICATIONS
-router.get("/user/:id", async (req, res) => {
-
-  const apps = await Application.find({
-    volunteerId: req.params.id
-  });
-
-  res.json(apps);
 
 });
 
 
-// GET APPLICATIONS FOR OPPORTUNITY
+// Get Applications by Opportunity (NGO side)
 router.get("/opportunity/:id", async (req, res) => {
 
-  const applications = await Application.find({
-    opportunityId: req.params.id
-  }).populate("volunteerId");
+  try {
 
-  res.json(applications);
+    const applications = await Application.find({
+      opportunityId: req.params.id
+    });
+
+    res.json(applications);
+
+  } catch (error) {
+
+    res.status(500).json({ message: "Server error" });
+
+  }
 
 });
 
 
-// UPDATE STATUS
+// Update Application Status (Accept / Reject)
 router.put("/update-status/:id", async (req, res) => {
 
-  const { status } = req.body;
+  try {
 
-  const updated = await Application.findByIdAndUpdate(
-    req.params.id,
-    { status },
-    { new: true }
-  );
+    const { status } = req.body;
 
-  res.json(updated);
+    const updated = await Application.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    res.json(updated);
+
+  } catch (error) {
+
+    res.status(500).json({ message: "Server error" });
+
+  }
 
 });
-
 module.exports = router;

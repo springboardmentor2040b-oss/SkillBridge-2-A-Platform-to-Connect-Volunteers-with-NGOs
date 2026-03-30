@@ -7,7 +7,6 @@ function CreateOpportunity() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Hooks
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -31,17 +30,6 @@ function CreateOpportunity() {
     { value: "Event Management", label: "Event Management" }
   ];
 
-  // Duration Dropdown Options
-  const durationOptions = [
-    "1 Day",
-    "3 Days",
-    "1 Week",
-    "2 Weeks",
-    "1 Month",
-    "3 Months"
-  ];
-
-  // Restrict access
   if (!user || user.role !== "ngo") {
     return (
       <div className="text-center mt-20 text-red-600 text-xl">
@@ -51,10 +39,12 @@ function CreateOpportunity() {
   }
 
   const handleChange = (e) => {
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+
   };
 
   const handleSubmit = async () => {
@@ -84,15 +74,22 @@ function CreateOpportunity() {
       const data = await response.json();
 
       if (response.ok) {
+
         alert("Opportunity Created Successfully");
         navigate("/dashboard");
+
       } else {
+
         alert(data.message || "Server Error");
+
       }
 
     } catch (err) {
+
       alert("Server Error");
+
     }
+
   };
 
   return (
@@ -103,75 +100,57 @@ function CreateOpportunity() {
           Create New Opportunity
         </h2>
 
-        {error && (
-          <p className="text-red-500 text-sm mb-4">{error}</p>
-        )}
+        {error && <p className="text-red-500 mb-4">{error}</p>}
 
-        {/* Title */}
-        <div className="mb-4">
-          <label className="block font-semibold mb-2">Title *</label>
-          <input
-            type="text"
-            name="title"
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg"
-          />
-        </div>
+        <input
+          type="text"
+          name="title"
+          placeholder="Title"
+          onChange={handleChange}
+          className="w-full border px-3 py-2 mb-3 rounded-lg"
+        />
 
-        {/* Description */}
-        <div className="mb-4">
-          <label className="block font-semibold mb-2">Description *</label>
-          <textarea
-            name="description"
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg"
-          />
-        </div>
+        <textarea
+          name="description"
+          placeholder="Description"
+          onChange={handleChange}
+          className="w-full border px-3 py-2 mb-3 rounded-lg"
+        />
 
-        {/* Skills Multi Select */}
-        <div className="mb-4">
-          <label className="block font-semibold mb-2">Required Skills *</label>
-          <Select
-            options={skillsOptions}
-            isMulti
-            value={selectedSkills}
-            onChange={setSelectedSkills}
-            placeholder="Select required skills..."
-          />
-        </div>
+        <Select
+          options={skillsOptions}
+          isMulti
+          value={selectedSkills}
+          onChange={setSelectedSkills}
+          placeholder="Select required skills..."
+        />
 
         {/* Duration Dropdown */}
-        <div className="mb-4">
-          <label className="block font-semibold mb-2">Duration</label>
-          <select
-            name="duration"
-            value={formData.duration}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg"
-          >
-            <option value="">Select Duration</option>
-            {durationOptions.map((duration, index) => (
-              <option key={index} value={duration}>
-                {duration}
-              </option>
-            ))}
-          </select>
-        </div>
+        <select
+          name="duration"
+          value={formData.duration}
+          onChange={handleChange}
+          className="w-full border px-3 py-2 mt-3 rounded-lg"
+        >
+          <option value="">Select Duration</option>
+          <option value="1 Week">1 Week</option>
+          <option value="2 Weeks">2 Weeks</option>
+          <option value="1 Month">1 Month</option>
+          <option value="3 Months">3 Months</option>
+          <option value="6 Months">6 Months</option>
+        </select>
 
-        {/* Location */}
-        <div className="mb-6">
-          <label className="block font-semibold mb-2">Location</label>
-          <input
-            type="text"
-            name="location"
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded-lg"
-          />
-        </div>
+        <input
+          type="text"
+          name="location"
+          placeholder="Location"
+          onChange={handleChange}
+          className="w-full border px-3 py-2 mt-3 rounded-lg"
+        />
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+          className="w-full bg-green-600 text-white py-2 mt-4 rounded-lg"
         >
           Create Opportunity
         </button>

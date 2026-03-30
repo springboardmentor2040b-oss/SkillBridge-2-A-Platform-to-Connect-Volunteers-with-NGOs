@@ -2,319 +2,520 @@ import React, { useEffect, useState } from "react";
 
 function ViewOpportunities() {
 
-  const storedUser = localStorage.getItem("user");
-  const user = storedUser ? JSON.parse(storedUser) : null;
+const storedUser = localStorage.getItem("user");
+const user = storedUser ? JSON.parse(storedUser) : null;
 
-  const [opportunities, setOpportunities] = useState([]);
-  const [appliedIds, setAppliedIds] = useState([]);
-  const [loadingApplyId, setLoadingApplyId] = useState(null);
-  const [applications, setApplications] = useState({});
-  const [search, setSearch] = useState("");
-  const [locationFilter, setLocationFilter] = useState("");
+const [opportunities, setOpportunities] = useState([]);
+const [appliedIds, setAppliedIds] = useState([]);
+const [loadingApplyId, setLoadingApplyId] = useState(null);
+const [applications, setApplications] = useState({});
 
+const [search, setSearch] = useState("");
+const [locationFilter, setLocationFilter] = useState("");
 
-  // FETCH OPPORTUNITIES
-  useEffect(() => {
+const [editData, setEditData] = useState(null);
+const [editForm, setEditForm] = useState({
+title: "",
+description: "",
+location: "",
+duration: "",
+required_skills: ""
+});
 
-    fetch("http://localhost:5000/api/opportunities")
-      .then(res => res.json())
-      .then(data => setOpportunities(data))
-      .catch(err => console.log(err));
+/* FETCH OPPORTUNITIES */
 
-  }, []);
+const fetchOpportunities = () => {
 
+fetch("http://localhost:5000/api/opportunities")
+.then(res => res.json())
+.then(data => setOpportunities(data))
+.catch(err => console.log(err));
 
-  // FETCH VOLUNTEER APPLICATIONS
-  useEffect(() => {
+};
 
-    if (!user || user.role?.toLowerCase() !== "volunteer") return;
+useEffect(() => {
+fetchOpportunities();
+}, []);
 
-    fetch(`http://localhost:5000/api/applications/user/${user._id}`)
-      .then(res => res.json())
-      .then(data => {
+/* FETCH VOLUNTEER APPLICATIONS */
 
-        const ids = data.map(app => app.opportunityId);
+useEffect(() => {
 
-        setAppliedIds(ids);
+if (!user || user.role !== "volunteer") return;
 
-      })
-      .catch(err => console.log(err));
+fetch(`http://localhost:5000/api/applications/user/${user._id}`)
+.then(res => res.json())
+.then(data => {
 
-  }, [user]);
+const ids = data.map(app => app.opportunityId);
+setAppliedIds(ids);
 
+})
+.catch(err => console.log(err));
 
-  // FETCH NGO APPLICATIONS
-  useEffect(() => {
+}, [user]);
 
-    if (!user || user.role?.toLowerCase() !== "ngo") return;
+/* FETCH NGO APPLICATIONS */
 
-    opportunities.forEach((opp) => {
+useEffect(() => {
 
-      fetch(`http://localhost:5000/api/applications/opportunity/${opp._id}`)
-        .then(res => res.json())
-        .then(data => {
+if (!user || user.role !== "ngo") return;
 
-          setApplications(prev => ({
-            ...prev,
-            [opp._id]: data
-          }));
+const fetchApplications = async () => {
 
-        })
-        .catch(err => console.log(err));
+let apps = {};
 
-    });
+for (let opp of opportunities) {
 
-  }, [opportunities, user]);
+try {
 
+const res = await fetch(`http://localhost:5000/api/applications/opportunity/${opp._id}`);
 
-  // APPLY FUNCTION
-  const handleApply = async (opportunityId) => {
+const data = await res.json();
 
-    if (!user) {
-      alert("Please login first");
-      return;
-    }
+apps[opp._id] = data;
 
-    setLoadingApplyId(opportunityId);
+} catch (err) {
+console.log(err);
+}
 
-    try {
+}
 
-      const res = await fetch(
-        "http://localhost:5000/api/applications/apply",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            volunteerId: user._id,
-            opportunityId
-          })
-        }
-      );
+setApplications(apps);
 
-      const data = await res.json();
+};
 
-      alert(data.message);
+if(opportunities.length > 0){
+fetchApplications();
+}
 
-      if (data.message === "Application submitted successfully") {
+}, [opportunities]);
 
-        setAppliedIds(prev => [...prev, opportunityId]);
+/* APPLY */
+const handleApply = async (opp) => {
 
-      }
+setLoadingApplyId(opp._id);
 
-    } catch (error) {
+try {
 
-      console.log(error);
+const res = await fetch(
+"http://localhost:5000/api/applications/apply",
+{
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+volunteerId: user._id,
+opportunityId: opp._id,
+ngoId: opp.ngo_id
+})
+}
+);
 
-    }
+const data = await res.json();
 
-    setLoadingApplyId(null);
+alert(data.message || "Application submitted successfully");
 
-  };
+if (data.message === "Application submitted successfully") {
+setAppliedIds(prev => [...prev, opp._id]);
+}
 
+} catch (error) {
+console.log(error);
+}
 
-  // ACCEPT / REJECT
-  const updateStatus = async (applicationId, status, opportunityId) => {
+setLoadingApplyId(null);
 
-    try {
+};
 
-      await fetch(
-        `http://localhost:5000/api/applications/update-status/${applicationId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ status })
-        }
-      );
+/* ACCEPT OR REJECT */
 
-      setApplications(prev => ({
-        ...prev,
-        [opportunityId]: prev[opportunityId].map(app =>
-          app._id === applicationId
-            ? { ...app, status }
-            : app
-        )
-      }));
+const updateStatus = async (applicationId, status, opportunityId) => {
 
-    } catch (error) {
+try {
 
-      console.log(error);
+await fetch(
+`http://localhost:5000/api/applications/update-status/${applicationId}`,
+{
+method: "PUT",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ status })
+}
+);
 
-    }
+setApplications(prev => ({
+...prev,
+[opportunityId]: prev[opportunityId].map(app =>
+app._id === applicationId
+? { ...app, status }
+: app
+)
+}));
 
-  };
+} catch (error) {
+console.log(error);
+}
 
+};
 
-  return (
-    <div className="p-8">
+/* DELETE */
 
-      <h2 className="text-2xl font-bold mb-6">
-        All Opportunities
-      </h2>
+const handleDelete = async (id) => {
 
+const confirmDelete = window.confirm("Delete this opportunity?");
+if (!confirmDelete) return;
 
-      {/* SEARCH */}
-      <input
-        type="text"
-        placeholder="Search opportunities..."
-        className="border p-2 mb-4 w-full"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+try {
 
+const res = await fetch(`http://localhost:5000/api/opportunities/${id}`, {
+method: "DELETE"
+});
 
-      {/* LOCATION FILTER */}
-      <select
-        className="border p-2 mb-6"
-        value={locationFilter}
-        onChange={(e) => setLocationFilter(e.target.value)}
-      >
-        <option value="">All Locations</option>
-        <option value="Remote">Remote</option>
-        <option value="Pune">Pune</option>
-        <option value="Mumbai">Mumbai</option>
-      </select>
+if(res.ok){
+setOpportunities(prev => prev.filter(op => op._id !== id));
+alert("Opportunity deleted successfully");
+}
 
+} catch (error) {
+console.log(error);
+}
 
-      {opportunities
-        .filter((opp) =>
-          (opp.title || "").toLowerCase().includes(search.toLowerCase()) &&
-          (locationFilter === "" || opp.location === locationFilter)
-        )
-        .map((opp) => (
+};
 
-        <div
-          key={opp._id}
-          className="border p-4 mb-4 rounded shadow bg-white"
-        >
+/* EDIT */
 
-          <h3 className="font-bold text-lg">
-            {opp.title}
-          </h3>
+const handleEdit = (opp) => {
 
-          <p>{opp.description}</p>
+setEditData(opp);
 
-          <p>
-            <strong>Location:</strong> {opp.location}
-          </p>
-
-          <p>
-            <strong>Duration:</strong> {opp.duration}
-          </p>
+setEditForm({
+title: opp.title,
+description: opp.description,
+location: opp.location,
+duration: opp.duration,
+required_skills: Array.isArray(opp.required_skills)
+? opp.required_skills.join(", ")
+: ""
+});
 
-          <p>
-            <strong>Skills:</strong>
-            {Array.isArray(opp.required_skills)
-              ? opp.required_skills.join(", ")
-              : ""}
-          </p>
+};
 
+const handleEditChange = (e) => {
 
-          {/* VOLUNTEER APPLY BUTTON */}
-          {user && user.role?.toLowerCase() === "volunteer" && (
+setEditForm({
+...editForm,
+[e.target.name]: e.target.value
+});
 
-            <button
-              onClick={() => handleApply(opp._id)}
-              disabled={loadingApplyId === opp._id}
-              className={`px-3 py-1 mt-3 rounded text-white ${
-                loadingApplyId === opp._id
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-blue-500"
-              }`}
-            >
+};
 
-              {loadingApplyId === opp._id
-                ? "Applying..."
-                : appliedIds.includes(opp._id)
-                ? "Applied"
-                : "Apply"}
+/* UPDATE */
 
-            </button>
+const handleUpdateSubmit = async () => {
 
-          )}
+try {
 
+const res = await fetch(
+`http://localhost:5000/api/opportunities/${editData._id}`,
+{
+method: "PUT",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+...editForm,
+required_skills: editForm.required_skills.split(",").map(s => s.trim())
+})
+}
+);
 
-          {/* NGO APPLICATION VIEW */}
-          {user && user.role?.toLowerCase() === "ngo" && (
+const updated = await res.json();
 
-            <div className="mt-4">
+setOpportunities(prev =>
+prev.map(o =>
+o._id === updated._id ? updated : o
+)
+);
 
-              <h4 className="font-semibold">
-                Volunteer Applications
-              </h4>
+alert("Opportunity updated successfully");
 
-              {applications[opp._id]?.length === 0 && (
-                <p>No volunteers applied yet</p>
-              )}
+setEditData(null);
 
-              {Array.isArray(applications[opp._id]) &&
-                applications[opp._id].map(app => (
+} catch (error) {
+console.log(error);
+}
 
-                <div
-                  key={app._id}
-                  className="border p-2 mt-2 rounded"
-                >
+};
 
-                  <p>
-                    <strong>Name:</strong>
-                    {app.volunteerId?.name}
-                  </p>
+return (
 
-                  <p>
-                    <strong>Email:</strong>
-                    {app.volunteerId?.email}
-                  </p>
+<div className="p-8 bg-gray-50 min-h-screen">
 
-                  <p>
-                    <strong>Status:</strong>
+<h2 className="text-2xl font-bold mb-6 text-gray-800">
+All Opportunities
+</h2>
 
-                    <span className={`ml-2 px-2 py-1 rounded text-white ${
-                      app.status === "accepted"
-                        ? "bg-green-500"
-                        : app.status === "rejected"
-                        ? "bg-red-500"
-                        : "bg-yellow-500"
-                    }`}>
-                      {app.status}
-                    </span>
+<input
+type="text"
+placeholder="Search opportunities..."
+className="border p-3 mb-4 w-full rounded-lg shadow-sm"
+value={search}
+onChange={(e) => setSearch(e.target.value)}
+/>
 
-                  </p>
+<select
+className="border p-3 mb-6 rounded-lg shadow-sm"
+value={locationFilter}
+onChange={(e) => setLocationFilter(e.target.value)}
+>
 
-                  <button
-                    onClick={() =>
-                      updateStatus(app._id, "accepted", opp._id)
-                    }
-                    className="bg-green-500 text-white px-2 py-1 mr-2 rounded"
-                  >
-                    Accept
-                  </button>
+<option value="">All Locations</option>
+<option value="Remote">Remote</option>
+<option value="Pune">Pune</option>
+<option value="Mumbai">Mumbai</option>
 
-                  <button
-                    onClick={() =>
-                      updateStatus(app._id, "rejected", opp._id)
-                    }
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                  >
-                    Reject
-                  </button>
+</select>
 
-                </div>
+<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-              ))}
+{opportunities
+.filter((opp) =>
+(opp.title || "").toLowerCase().includes(search.toLowerCase()) &&
+(locationFilter === "" || opp.location === locationFilter)
+)
+.map((opp) => (
 
-            </div>
+<div
+key={opp._id}
+className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-5 border border-gray-100"
+>
 
-          )}
+<h3 className="text-lg font-semibold text-gray-800">
+{opp.title}
+</h3>
 
-        </div>
+<p className="text-sm text-gray-500 mb-3">
+{opp.description}
+</p>
 
-      ))}
+<p className="text-sm text-gray-600">
+📍 {opp.location}
+</p>
 
-    </div>
-  );
+<p className="text-sm text-gray-600 mb-3">
+⏳ {opp.duration}
+</p>
+
+<div className="flex flex-wrap gap-2 mb-4">
+
+{Array.isArray(opp.required_skills) &&
+opp.required_skills.map((skill, i) => (
+
+<span
+key={i}
+className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md"
+>
+{skill}
+</span>
+
+))}
+
+</div>
+
+{user && user.role === "volunteer" && (
+
+<button
+onClick={() => handleApply(opp)}
+disabled={appliedIds.includes(opp._id)}
+className={`w-full py-2 rounded-lg font-medium ${
+appliedIds.includes(opp._id)
+? "bg-yellow-100 text-yellow-700"
+: "bg-blue-500 hover:bg-blue-600 text-white"
+}`}
+>
+
+{appliedIds.includes(opp._id)
+? "Application Pending"
+: loadingApplyId === opp._id
+? "Applying..."
+: "Apply"}
+
+</button>
+
+)}
+
+{user && user.role === "ngo" && (
+
+<div>
+
+<div className="flex gap-3 mt-3">
+
+<button
+onClick={() => handleEdit(opp)}
+className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-1 rounded-lg"
+>
+Update
+</button>
+
+<button
+onClick={() => handleDelete(opp._id)}
+className="flex-1 bg-red-500 hover:bg-red-600 text-white py-1 rounded-lg"
+>
+Delete
+</button>
+
+</div>
+
+<div className="mt-4">
+
+<h4 className="text-sm font-semibold mb-2">
+Volunteer Applications
+</h4>
+
+{applications[opp._id]?.map(app => (
+
+<div
+key={app._id}
+className="flex justify-between items-center mb-2"
+>
+
+<span className="text-sm">
+{app.volunteerName || "Volunteer"}
+</span>
+
+{app.status === "Pending" ? (
+
+<div className="flex gap-2">
+
+<button
+onClick={() => updateStatus(app._id,"Accepted",opp._id)}
+className="bg-green-500 text-white px-2 py-1 text-xs rounded"
+>
+Accept
+</button>
+
+<button
+onClick={() => updateStatus(app._id,"Rejected",opp._id)}
+className="bg-red-500 text-white px-2 py-1 text-xs rounded"
+>
+Reject
+</button>
+
+</div>
+
+) : (
+
+<span className="text-xs text-gray-600">
+{app.status}
+</span>
+
+)}
+
+</div>
+
+))}
+
+</div>
+
+</div>
+
+)}
+
+</div>
+
+))}
+
+</div>
+
+{/* UPDATE MODAL */}
+
+{editData && (
+
+<div className="fixed inset-0 flex justify-center items-center z-50">
+
+<div
+className="absolute inset-0 bg-black bg-opacity-40"
+onClick={() => setEditData(null)}
+></div>
+
+<div className="bg-white p-6 rounded shadow w-96 relative z-10">
+
+<h2 className="text-xl font-bold mb-4">
+Update Opportunity
+</h2>
+
+<input
+type="text"
+name="title"
+value={editForm.title}
+onChange={handleEditChange}
+className="border p-2 mb-2 w-full"
+/>
+
+<textarea
+name="description"
+value={editForm.description}
+onChange={handleEditChange}
+className="border p-2 mb-2 w-full"
+/>
+
+<input
+type="text"
+name="location"
+value={editForm.location}
+onChange={handleEditChange}
+className="border p-2 mb-2 w-full"
+/>
+
+<select
+name="duration"
+value={editForm.duration}
+onChange={handleEditChange}
+className="border p-2 mb-2 w-full"
+>
+
+<option value="">Select Duration</option>
+<option value="1 Week">1 Week</option>
+<option value="2 Weeks">2 Weeks</option>
+<option value="1 Month">1 Month</option>
+<option value="3 Months">3 Months</option>
+<option value="6 Months">6 Months</option>
+
+</select>
+
+<input
+type="text"
+name="required_skills"
+value={editForm.required_skills}
+onChange={handleEditChange}
+className="border p-2 mb-3 w-full"
+/>
+
+<div className="flex justify-between">
+
+<button
+onClick={handleUpdateSubmit}
+className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+>
+Update
+</button>
+
+<button
+onClick={() => setEditData(null)}
+className="bg-gray-500 text-white px-3 py-1 rounded"
+>
+Cancel
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+)}
+
+</div>
+
+);
+
 }
 
 export default ViewOpportunities;

@@ -1,23 +1,34 @@
 const express = require("express");
 const router = express.Router();
+const Opportunity = require("../models/Opportunity");
 
-const {
-  createOpportunity,
-  getOpportunities,
-  updateOpportunity,   // ✅ ADD THIS
-  deleteOpportunity
-} = require("../controllers/opportunityController");
+// GET opportunities
+router.get("/", async (req, res) => {
+  const opportunities = await Opportunity.find();
+  res.json(opportunities);
+});
 
-// ✅ CREATE
-router.post("/create", createOpportunity);
+// CREATE opportunity
+router.post("/create", async (req, res) => {
+  const opportunity = new Opportunity(req.body);
+  await opportunity.save();
+  res.json(opportunity);
+});
 
-// ✅ GET ALL
-router.get("/", getOpportunities);
+// UPDATE opportunity
+router.put("/:id", async (req, res) => {
+  const updatedOpportunity = await Opportunity.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+  res.json(updatedOpportunity);
+});
 
-// ✅ UPDATE (ONLY NGO SHOULD BE ALLOWED IN CONTROLLER OR MIDDLEWARE)
-router.put("/:id", updateOpportunity);   // ✅ ADD THIS
-
-// ✅ DELETE
-router.delete("/:id", deleteOpportunity);
+// DELETE opportunity
+router.delete("/:id", async (req, res) => {
+  const deletedOpportunity = await Opportunity.findByIdAndDelete(req.params.id);
+  res.json(deletedOpportunity);
+});
 
 module.exports = router;
