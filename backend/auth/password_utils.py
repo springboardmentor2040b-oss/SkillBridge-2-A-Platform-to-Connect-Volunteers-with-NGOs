@@ -1,7 +1,8 @@
 from passlib.context import CryptContext
 
+# Switch to pbkdf2_sha256 for better portability and avoiding bcrypt 72-char limit issues
 pwd_context = CryptContext(
-    schemes=["bcrypt"],
+    schemes=["pbkdf2_sha256"],
     deprecated="auto"
 )
 
